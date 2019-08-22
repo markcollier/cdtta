@@ -1,5 +1,4 @@
-#!/anaconda3/envs/qbo_new/bin/python
-
+#!/usr/bin/env python3
 
 diag = True
 diag = False
@@ -66,9 +65,13 @@ from src.cdtta_funcs import \
 ################################################################################
 ################################################################################
 
-json_directory = 'cdtta_thursday_night_json' #where json database files are kept.
+pd.set_option('display.max_columns', 30)
+pd.set_option('display.max_rows', 400)
+pd.set_option('display.max_colwidth', -1)
 
+json_directory = 'cdtta_thursday_night_json' #where json database files are kept.
 validated_json_directory = json_directory+'/'+'validated'
+temporary_json_directory = json_directory+'/'+'temporary' #put files there after validation, these files can be deleted in future.
 
 if(not os.path.exists(json_directory)):
     raise SystemExit('function: json_directory doesnt exist.'+__file__+' line number: '+str(inspect.stack()[0][2]))
@@ -76,10 +79,13 @@ if(not os.path.exists(json_directory)):
 if(not os.path.exists(validated_json_directory)):
     raise SystemExit('function: validated_json_directory doesnt exist.'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
+if(not os.path.exists(temporary_json_directory)):
+    raise SystemExit('function: temporary_json_directory doesnt exist.'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
 json_orient = 'split'
 json_orient = 'records'
 
-full_table_df = pd.read_json(r'full_table.json') #, orient='index')
+full_table_df = pd.read_json(json_directory+'/'+'full_table.json') #, orient='index')
 
 number_of_games_per_match = 7
 
@@ -118,36 +124,75 @@ for input_file in input_validated_files:
 
 print(CRED+'Processing '+str(len(input_raw_files))+' files:'+CEND)
 
+if(len(input_raw_files) > 0):
+    for n in range(99):
+        try:
+            PERSON_VALIDATING_DATA = input(CRED+'Enter your full name (person validating match results) - alpha & spaces allowed: '+CEND)
+        except:
+            print(CGREEN+'Try again.'+CEND)
+            continue
+
+        #print('xxx'+PERSON_VALIDATING_DATA+'xxx')
+        #print(PERSON_VALIDATING_DATA.isdigit())
+
+        if(PERSON_VALIDATING_DATA.isdigit() and int(PERSON_VALIDATING_DATA) == 0):
+            print(CRED+'Exiting...'+CEND)
+            exit(0)
+        elif(PERSON_VALIDATING_DATA == ''):
+            print(CGREEN+'No blanks, try again.'+CEND)
+            continue
+        elif(not PERSON_VALIDATING_DATA.replace(' ', '').isalpha()):
+            print(CGREEN+'Only alphabet letters,  try again.'+CEND)
+            continue
+        else:
+            break
+
+#mc TODAYS_DATE_TIME = datetime.datetime.now()
+
+TODAYS_DATE_TIME = datetime.datetime.today().strftime('YYYY-MM-DD=%Y-%m-%d HH-MM-SS=%H-%M-%S')
+
+
 for cnt,input_file in enumerate(input_raw_files):
     
     input_json_file = just_file_name(diag, input_file)
     
-    section, ROUND, match = section_ROUND_match_from_json_file(diag, json_directory+'/'+input_json_file)
-    input_json_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
+    section, ROUND, match = section_ROUND_match_from_json_filename(diag, json_directory+'/'+input_json_file)
+#mc     input_json_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
 
     print(CGREEN+str(cnt+1)+'/'+str(len(input_raw_files))+': Examining input_json_file='+input_json_file+CEND)
-    print(CGREEN+str(cnt+1)+'/'+str(len(input_raw_files))+': Examining input_json_meta_file='+input_json_meta_file+CEND)
+#mc     print(CGREEN+str(cnt+1)+'/'+str(len(input_raw_files))+': Examining input_json_meta_file='+input_json_meta_file+CEND)
     
-    if(not os.path.exists(json_directory+'/'+input_json_meta_file)):
-        print(json_directory+'/'+input_json_meta_file)
-        raise SystemExit('function: missing meta twin file.'+__file__+' line number: '+str(inspect.stack()[0][2]))
+#mc     if(not os.path.exists(json_directory+'/'+input_json_meta_file)):
+#mc         print(json_directory+'/'+input_json_meta_file)
+#mc         raise SystemExit('function: missing meta twin file.'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     json_match_df = pd.read_json(json_directory+'/'+input_json_file, orient=json_orient)
-    
-    results_teamA = chunk_them(diag, json_match_df['Results Team A'].values, 7)
-    results_teamB = chunk_them(diag, json_match_df['Results Team B'].values, 7)
-    
-    if(len(results_teamA) != len(results_teamB)):
-        raise SystemExit('function: len(results_teamA) != len(results_teamB).'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
-    if(diag): print('results_teamA=',results_teamA)
+    #display(json_match_df)
+
+    results = json_match_df['Result']
+
+    if(len(results) != number_of_matches_per_match):
+        raise SystemExit('function: len(results)) != number_of_matches_per_match.'+__file__+' line number: '+str(inspect.stack()[0][2]))
+    
+#mc    results_teamA = chunk_them(diag, json_match_df['Results Team A'].values, 7)
+#mc    results_teamB = chunk_them(diag, json_match_df['Results Team B'].values, 7)
+    
+#mc    if(len(results_teamA) != len(results_teamB)):
+#mc        raise SystemExit('function: len(results_teamA) != len(results_teamB).'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    if(True): print('results=',results)
 
         #here we are always overriding result with that from input so that we can display it to make a decision
         #about whether it is correct or not.
+
+    #exit(0)
+
+    override_result = results
         
-    override_result = []
-    for cnt,results in enumerate(results_teamA):
-        override_result.append( [results_teamA[cnt], results_teamB[cnt] ])
+#mc    override_result = []
+#mc    for cnt,results in enumerate(results_teamA):
+#mc        override_result.append( [results_teamA[cnt], results_teamB[cnt] ])
         
     #print('override_result=',override_result)
         
@@ -166,12 +211,19 @@ for cnt,input_file in enumerate(input_raw_files):
     display(team_sheet_df)
 
     display(summary_df)
+
+
+    json_match_df['Validated'] = ['YES'] * number_of_matches_per_match
+    json_match_df['Validation Person'] = [PERSON_VALIDATING_DATA] * number_of_matches_per_match
+    json_match_df['Validated Date/Time'] = [TODAYS_DATE_TIME] * number_of_matches_per_match
+
+    display(json_match_df)
         
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     for n in range(999):
         try:
-            QUESTION = input(CRED+'Would you like to move this raw file to the validated area? [y/n] or 0=break'+CEND)
+            QUESTION = input(CRED+'Would you like to move this raw file to the validated area [y/n or 0=break]? '+CEND)
         except:
             print('Try again.')
             continue
@@ -185,17 +237,27 @@ for cnt,input_file in enumerate(input_raw_files):
             break
 
     if(QUESTION == 'y'):
-        print(CGREEN+'Move '+json_directory+'/'+input_json_file+' to '+validated_json_directory+CEND)
-        print(CGREEN+'Move '+json_directory+'/'+input_json_meta_file+' to '+validated_json_directory+CEND)
-        
+#mc         print(CGREEN+'Move '+json_directory+'/'+input_json_meta_file+' to '+validated_json_directory+CEND)
         #could check on value of newPath
-        
-        newPath = shutil.move(json_directory+'/'+input_json_file, validated_json_directory)
+        print(CGREEN+'Move '+json_directory+'/'+input_json_file+' to '+temporary_json_directory+CEND)
+
+        if(os.path.isfile(temporary_json_directory+'/'+input_json_file)):
+             print(CRED+'Removing '+temporary_json_directory+'/'+input_json_file+CEND) #might like to copy or somethign else later.
+             os.remove(temporary_json_directory+'/'+input_json_file)
+
+        newPath = shutil.move(json_directory+'/'+input_json_file, temporary_json_directory)
         print('newPath=',newPath)
-        newPath = shutil.move(json_directory+'/'+input_json_meta_file, validated_json_directory)
-        print('newPath=',newPath)
+
+        print(CGREEN+'Creating validated file from dataframe '+validated_json_directory+'/'+input_json_file+CEND)
+
+        json_match_df.to_json(validated_json_directory+'/'+input_json_file, orient=json_orient)
+        tidy_json(diag, validated_json_directory+'/'+input_json_file)
+
+#mc         newPath = shutil.move(json_directory+'/'+input_json_meta_file, validated_json_directory)
+#mc         print('newPath=',newPath)
     else:
-        print(CGREEN+'Not moving these raw file/meta files to validated directory.'+CEND)
+#mc        print(CGREEN+'Not moving these raw file/meta files to validated directory.'+CEND)
+        print(CGREEN+'Not moving this raw file to validated directory.'+CEND)
     
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 

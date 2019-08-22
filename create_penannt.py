@@ -1,4 +1,4 @@
-#!/anaconda3/envs/qbo_new/bin/python
+#!/usr/bin/env python3
 
 diag = True
 diag = False
@@ -61,8 +61,6 @@ from src.cdtta_funcs import \
     tuple_pair_to_list, \
     update_player_rank, \
     update_team_rank
-
-#print('hello')
 
 ################################################################################
 ################################################################################
@@ -554,6 +552,18 @@ empty_5xN = [         [[], []],  \
                       [[], []], \
                       [[], []], ]
 
+empty_11xN = [         [[], []],  \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], \
+                      [[], []], ]
+
 current_entries = 0
 
 simple_table = True #create simple table allocation, will not be functinal though.
@@ -604,13 +614,16 @@ for round0 in range(number_rounds):
                     iswitch += 1
                     print(CRED+json_directory+'/'+input_json_file+' exists...loading'+CEND)
                     json_match_df = pd.read_json(r''+json_directory+'/'+input_json_file, orient=json_orient)
-                    results0.append(match_5xN(diag, json_match_df, number_of_games_per_match))
+                    results0.append(match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match))
 
                 if(os.path.exists(validated_json_directory+'/'+input_json_file) and (json_status == 1 or json_status == 3)):
                     iswitch += 1
                     print(CRED+validated_json_directory+'/'+input_json_file+' exists...loading'+CEND)
                     json_match_df = pd.read_json(r''+validated_json_directory+'/'+input_json_file, orient=json_orient)
-                    results0.append(match_5xN(diag, json_match_df, number_of_games_per_match))
+
+                    print(json_match_df)
+
+                    results0.append(match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match))
 
             if(iswitch == 0):
                 results0.append(empty_5xN)
@@ -679,7 +692,7 @@ pd.set_option('display.max_colwidth', -1)
 
 display(full_table_df)
 
-full_table_df.to_json(r'full_table.json')
+full_table_df.to_json(json_directory+'/'+'full_table.json')
 
 ################################################################################
 ################################################################################

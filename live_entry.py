@@ -1,4 +1,4 @@
-#!/anaconda3/envs/qbo_new/bin/python
+#!/usr/bin/env python3
 
 #need to make sure that if entry exists in validated directory that a raw file cannot be generated, or at least a warning given.
 
@@ -77,7 +77,7 @@ if(not os.path.exists(validated_json_directory)):
 json_orient = 'split'
 json_orient = 'records'
 
-full_table_df = pd.read_json(r'full_table.json')
+full_table_df = pd.read_json(json_directory+'/'+'full_table.json')
 
 number_of_games_per_match = 7
 

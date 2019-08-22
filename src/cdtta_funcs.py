@@ -371,23 +371,34 @@ def process_single_match(diag, A, B, number_of_games_per_match, number_of_matche
 
 ################################################################################
 
-def match_5xN(diag, df, N):
+def match_5xN(diag, df, number_of_games_per_match, number_of_matches_per_match):
     '''
     Creator: Mark Collier
-    Last Modified: 16 August 2019
+    Last Modified: 22 August 2019
     
     setup for 5 matches, N games each.
     '''
     out_list = []
 
-    teamA = chunk_them(diag, df.sort_values(by=['Unique game'])['Results Team A'].tolist(), N)
-    teamB = chunk_them(diag, df.sort_values(by=['Unique game'])['Results Team B'].tolist(), N)
+#mc    teamA = chunk_them(diag, df.sort_values(by=['Unique game'])['Results Team A'].tolist(), N)
+#mc    teamB = chunk_them(diag, df.sort_values(by=['Unique game'])['Results Team B'].tolist(), N)
 
-    if(diag): print('teamA=',teamA)
-    if(diag): print('teamB=',teamB)
+    results = df.sort_values(by=['Unique Match'])['Result']
 
-    for n in range(5):
-        out_list.append([teamA[n], teamB[n]])
+    if(diag): print('results=',results)
+
+    for n in range(number_of_matches_per_match):
+        out_list.append(results[n])
+
+    if(diag): print('out_list=',out_list)
+
+#mc    exit(0)
+
+#mc    if(diag): print('teamA=',teamA)
+#mc    if(diag): print('teamB=',teamB)
+
+#mc    for n in range(5):
+#mc        out_list.append([teamA[n], teamB[n]])
     return(out_list) #end of match_5xN
 
 ################################################################################
@@ -1023,7 +1034,7 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     
     for n in range(99):
         try:
-            PERSON_ENTERING_DATA = input(CRED+'Enter your full name (person entering match results) - alpha & spaces allowed:'+CEND)
+            PERSON_ENTERING_DATA = input(CRED+'Enter your full name (person entering match results) - alpha & spaces allowed: '+CEND)
         except:
             print(CGREEN+'Try again.'+CEND)
             continue
@@ -1043,7 +1054,9 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
         else:
             break
     
-    TODAYS_DATE_TIME = datetime.datetime.now()
+#mc    TODAYS_DATE_TIME = datetime.datetime.now()
+
+    TODAYS_DATE_TIME = datetime.datetime.today().strftime('YYYY-MM-DD=%Y-%m-%d HH-MM-SS=%H-%M-%S')
     
     print(CGREEN+'PERSON ENTERING DATA='+PERSON_ENTERING_DATA+' DATE/TIME (YYYY-MM-DD HH:MM:SS)='+str(TODAYS_DATE_TIME)+CEND)
 
@@ -1102,17 +1115,17 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     #keep data and meta (scalar) data in separate files...
     
     output_data_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_data.json'
-    output_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
+    #mc output_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
     
     if(os.path.isfile(output_directory+'/'+output_data_file)):
         print(CRED+'Warning: output file '+output_directory+'/'+output_data_file+ ' exists.'+CEND)
     else:
         print(CGREEN+'Output file=',output_directory+'/'+output_data_file+CEND)
 
-    if(os.path.isfile(output_directory+'/'+output_meta_file)):
-        print(CRED+'Warning: output file '+output_directory+'/'+output_meta_file+ ' exists.'+CEND)
-    else:
-        print(CGREEN+'Output file=',output_directory+'/'+output_meta_file+CEND)
+    #mc if(os.path.isfile(output_directory+'/'+output_meta_file)):
+    #mc     print(CRED+'Warning: output file '+output_directory+'/'+output_meta_file+ ' exists.'+CEND)
+    #mc else:
+    #mc     print(CGREEN+'Output file=',output_directory+'/'+output_meta_file+CEND)
         
     # def padded_integer_match(diag, keyboard_entry):
     #     '''
@@ -1127,6 +1140,15 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     # if(len(j) != 2):
     #     print('j wrong length')
 
+    table_wooden = match_extract_df['Table'].values[0]
+    unique_match = match_extract_df['Unique match'].values[0]
+    ROUND = match_extract_df['Round'].values[0]
+    section = match_extract_df['Section'].values[0]
+    match = match_extract_df['Match'].values[0]
+    match_date = match_extract_df['Match Date'].values[0]
+
+    #print('table_wooden_table=',table_wooden)
+
     team1_player1 = match_extract_df['Team1 Player1'].values.tolist()[0].strip()
     team1_player2 = match_extract_df['Team1 Player2'].values.tolist()[0].strip()
 
@@ -1136,7 +1158,56 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     tmp1 = match_extract_df['Team1'].values.tolist()[0]
     tmp2 = match_extract_df['Team2'].values.tolist()[0]
 
-    print('tmp1=',tmp1)
+###############################################################################################################
+
+    for n in range(999):
+        try:
+            QUESTION = input(CRED+'Were there any fill-ins [y/n or 0=break]? '+CEND)
+        except:
+            print('Try again.')
+            continue
+
+        if(not QUESTION.isalpha() and int(QUESTION) == 0):
+            raise SystemExit('function: Exiting Validation.'+__file__+' line number: '+str(inspect.stack()[0][2]))
+        elif(QUESTION != 'y' and QUESTION != 'n'):
+            print('Only "y" or "n", try again.')
+            continue
+        else:
+            break
+
+    if(QUESTION == 'y'):
+        icheck2 = 0
+        print('Specify Which players were replaced with a fillin?')
+        team1_player1_fillin = input('Team A/B player A [0 = no, "Surname, FirstName"]: '+team1_player1+': ')
+        team1_player2_fillin = input('Team A/B player B [0 = no, "Surname, FirstName"]: '+team1_player2+': ')
+        team2_player1_fillin = input('Team X/Y player A [0 = no, "Surname, FirstName"]: '+team2_player1+': ')
+        team2_player2_fillin = input('Team X/Y player B [0 = no, "Surname, FirstName"]: '+team2_player2+': ')
+
+        if(icheck2 == 0):
+            print('You specified fill in but gave no one.')
+
+        if(team1_player1_fillin.isdigit() and int(team1_player1_fillin) == 0):
+            team1_player1_fillin = 'NO'
+
+        if(team1_player2_fillin.isdigit() and int(team1_player2_fillin) == 0):
+            team1_player2_fillin = 'NO'
+
+        if(team2_player1_fillin.isdigit() and int(team2_player1_fillin) == 0):
+            team2_player1_fillin = 'NO'
+
+        if(team2_player2_fillin.isdigit() and int(team2_player2_fillin) == 0):
+            team2_player2_fillin = 'NO'
+
+        fillins = [ [[team1_player1_fillin],[team2_player1_fillin]], [[team1_player2_fillin],[team2_player2_fillin]], [[team1_player2_fillin],[team2_player1_fillin]], [[team1_player1_fillin],[team2_player2_fillin]], [['Doubles A/B'],['Doubles X/Y']], ]
+    else:
+        fillins = [ [['NO'],['NO']], [['NO'],['NO']], [['NO'],['NO']], [['NO'],['NO']], [['NO'],['NO']], ]
+
+    print('fillins=',fillins)
+
+
+###############################################################################################################
+
+    if(diag): print('tmp1=',tmp1)
 
     if(tmp1.strip() == 'Team A Dummy' or tmp2.strip() == 'Team B Dummy'):
         print(CRED+'Team A/B Dummy, must be a finals round no entry allowed.'+CEND)
@@ -1253,33 +1324,66 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
 
     games = list(range(1,number_of_games_per_match+1)) * number_of_matches_per_match
     
+#mc     data_df = pd.DataFrame({ \
+#mc                                 'Unique game': range(1,len(games)+1), \
+#mc                                 'Section' : [section] * len(games), \
+#mc                                 'Round' : [ROUND] * len(games), \
+#mc                                 'Match' : [match] * len(games), \
+#mc                                 'Games': games, \
+#mc                                 'Results Team A' : teamA, \
+#mc                                 'Results Team B' : teamB, \
+#mc #                                 'Entry Person' : [PERSON_ENTERING_DATA] * len(games), \
+#mc #                                 'Date/Time Creation': [TODAYS_DATE_TIME] * len(games),\
+#mc                       })
+#mc      
+#mc     meta_df = pd.DataFrame([{ \
+#mc                                 'Entry Person': PERSON_ENTERING_DATA, \
+#mc                                 'Date/Time Creation': TODAYS_DATE_TIME}])
+
+    team1_player1 = match_extract_df['Team1 Player1'].values.tolist()[0].strip()
+    team1_player2 = match_extract_df['Team1 Player2'].values.tolist()[0].strip()
+
+    team2_player1 = match_extract_df['Team2 Player1'].values.tolist()[0].strip()
+    team2_player2 = match_extract_df['Team2 Player2'].values.tolist()[0].strip()
+
     data_df = pd.DataFrame({ \
-                                'Unique game': range(1,len(games)+1), \
-                                'Section' : [section] * len(games), \
-                                'Round' : [ROUND] * len(games), \
-                                'Match' : [match] * len(games), \
-                                'Games': games, \
-                                'Results Team A' : teamA, \
-                                'Results Team B' : teamB, \
-#                                 'Entry Person' : [PERSON_ENTERING_DATA] * len(games), \
-#                                 'Date/Time Creation': [TODAYS_DATE_TIME] * len(games),\
-                      })
-    
-    meta_df = pd.DataFrame([{ \
-                                'Entry Person': PERSON_ENTERING_DATA, \
-                                'Date/Time Creation': TODAYS_DATE_TIME}])
+      'Unique Match' : [unique_match] * number_of_matches_per_match, \
+      'Entry Person'       : [PERSON_ENTERING_DATA] * number_of_matches_per_match, \
+      'Creation Date/Time' : [TODAYS_DATE_TIME] * number_of_matches_per_match, \
+      'Round Match' : [match] * number_of_matches_per_match, \
+      'Match' : range(1,number_of_matches_per_match+1), \
+      'Round' : [ROUND] * number_of_matches_per_match, \
+      'Section' : [section] * number_of_matches_per_match, \
+      'Table' : [table_wooden] * number_of_matches_per_match, \
+      'Match Date' : [match_date] * number_of_matches_per_match , \
+      'TeamA/B X/Y'        : [ [['TeamA/B'],['TeamX/Y']], [['TeamA/B'],['TeamX/Y']], [['TeamA/B'],['TeamX/Y']], [['TeamA/B'],['TeamX/Y']], [['TeamA/B'],['TeamX/Y']], ], \
+      'Team Names'         : [ [[team1],[team2]], [[team1],[team2]], [[team1],[team2]], [[team1],[team2]], [[team1],[team2]], ], \
+
+      'PlayerA/B X/Y'      : [ [['Team A/B Player A'],['Team X/Y Player A']], [['Team A/B Player B'],['Team X/Y Player B']], [['Team A/B Player B'],['Team X/Y Player A']], [['Team A/B Player A'],['Team X/Y Player B']], [['Doubles A/B'],['Doubles X/Y']], ], \
+      'Player Names'       : [ [[team1_player1],[team2_player1]], [[team1_player2],[team2_player2]], [[team1_player2],[team2_player1]], [[team1_player1],[team2_player2]], [['Doubles A/B'],['Doubles X/Y']], ], \
+      'Fillin Playes Names': fillins, \
+      'Result'             : [ [[11,11,11,11,0,0,0], [3,4,5,6,0,0,0]], [[11,11,11,11,0,0,0], [8,8,8,8,0,0,0]], [[11,11,11,11,0,0,0], [9,8,7,6,0,0,0]], [[13,13,13,13,0,0,0], [11,11,11,11,0,0,0]], [[11,11,11,11,0,0,0], [1,1,1,1,0,0,0]] ], \
+      'Validated'          : ['NO'] * number_of_matches_per_match, \
+      'Validated Date/Time': ['NO'] * number_of_matches_per_match, \
+      'Validation Person'  : ['NO'] * number_of_matches_per_match, \
+   })
+
+    pd.set_option('display.max_columns', 30)
+    pd.set_option('display.max_rows', 400)
+    pd.set_option('display.max_colwidth', -1)
 
     display(data_df)
-    display(meta_df)
+#mc fuck
+#mc     display(meta_df)
     
     print(CRED+'Writing to json file: '+output_directory+'/'+output_data_file+CEND)
-    print(CRED+'Writing to json file: '+output_directory+'/'+output_meta_file+CEND)
+#mc    print(CRED+'Writing to json file: '+output_directory+'/'+output_meta_file+CEND)
     
     data_df.to_json(r''+output_directory+'/'+output_data_file, orient=json_orient)
     
     tidy_json(diag, r''+output_directory+'/'+output_data_file)
     
-    meta_df.to_json(r''+output_directory+'/'+output_meta_file, orient=json_orient)
+#mc     meta_df.to_json(r''+output_directory+'/'+output_meta_file, orient=json_orient)
     
     # j_df = pd.read_json(r''+output_directory+'/'+output_file, orient=json_orient)
 
@@ -1394,12 +1498,44 @@ def make_draw(diag, all_sections_all_rounds, YYYYMMDD):
 
 ################################################################################
 
+#mc def tidy_json(diag, input_output_file):
+#mc     '''
+#mc     Creator: Mark Collier
+#mc     Last Modified: 19 August 2019
+#mc     
+#mc     Minor changes to make the json file more readable. Current version will overwrite file given.
+#mc     
+#mc     Inputs:
+#mc     input file
+#mc 
+#mc     Outputs:
+#mc     output_file
+#mc     '''
+#mc     import inspect
+#mc     
+#mc     ifh = open(input_output_file)
+#mc     for i,line in enumerate(ifh):
+#mc         line = line.replace(',{"Unique',',\n{"Unique')
+#mc         if(diag): print(line)
+#mc     ifh.close()
+#mc     
+#mc     if(diag): print('i=',i)
+#mc         
+#mc     if(i!=0):
+#mc         raise SystemExit('tidy_json: i.ne.0:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+#mc     ofh = open(input_output_file, 'w')
+#mc     print(line,file=ofh)
+#mc     ofh.close()
+#mc     
+#mc     return() #end of tidy_json
+
 def tidy_json(diag, input_output_file):
     '''
     Creator: Mark Collier
-    Last Modified: 19 August 2019
+    Last Modified: 22 August 2019
     
-    Minor changes to make the json file more readable. Current version will overwrite file given.
+    Minor changes to make the json file more readable.
     
     Inputs:
     input file
@@ -1408,22 +1544,26 @@ def tidy_json(diag, input_output_file):
     output_file
     '''
     import inspect
-    
+
     ifh = open(input_output_file)
     for i,line in enumerate(ifh):
-        line = line.replace(',{"Unique',',\n{"Unique')
+
+        line = line.replace('},{', '},\n{')
+        line = line.replace('[{','[\n{')
+        line = line.replace('}]','}\n]')
+
         if(diag): print(line)
     ifh.close()
-    
+
     if(diag): print('i=',i)
-        
+
     if(i!=0):
         raise SystemExit('tidy_json: i.ne.0:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     ofh = open(input_output_file, 'w')
     print(line,file=ofh)
     ofh.close()
-    
+
     return() #end of tidy_json
 
 ################################################################################
