@@ -88,7 +88,7 @@ number_of_matches_per_match = 5
 
 for n0 in range(999):
     print('Iteration [0] '+str(n0+1))
-    live_match(diag, full_table_df, number_of_games_per_match, number_of_matches_per_match, json_directory, json_orient)
+    live_match(diag, full_table_df, number_of_games_per_match, number_of_matches_per_match, json_directory, validated_json_directory, json_orient)
 
 ################################################################################
 ################################################################################

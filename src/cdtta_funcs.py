@@ -990,7 +990,7 @@ def keyboard_entry(diag, entry, number_of_games_per_match, number_of_matches_per
 
 ################################################################################
 
-def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_match, output_directory, json_orient):
+def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_match, json_directory, validated_json_directory, json_orient):
     '''
     Creator: Mark Collier
     Last Modified: 22 August 2019
@@ -1008,7 +1008,8 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     main_df: the main data frame, currently called full_table_df
     number_of_games_per_match: usually a number like 3, 5 or 7.
     number_of_matches_per_match: usually a number like 5, 7 or 11.
-    output_directory:
+    json_directory:
+    validated_json_directory:
     json_orient style of formatting, variable used to be consistent across all functions.
     
     Outputs:
@@ -1116,11 +1117,17 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     
     output_data_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_data.json'
     #mc output_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
+
+    if(os.path.isfile(json_directory+'/'+output_data_file) and os.path.isfile(validated_json_directory+'/'+output_data_file)):
+        print(CRED+'Warning: raw & validated output file exist... '+CEND)
+
+    if(os.path.isfile(validated_json_directory+'/'+output_data_file)):
+        print(CRED+'Warning: validated output file '+validated_json_directory+'/'+output_data_file+ ' exists.'+CEND)
     
-    if(os.path.isfile(output_directory+'/'+output_data_file)):
-        print(CRED+'Warning: output file '+output_directory+'/'+output_data_file+ ' exists.'+CEND)
+    if(os.path.isfile(json_directory+'/'+output_data_file)):
+        print(CRED+'Warning: output file '+json_directory+'/'+output_data_file+ ' exists.'+CEND)
     else:
-        print(CGREEN+'Output file=',output_directory+'/'+output_data_file+CEND)
+        print(CGREEN+'Output file=',json_directory+'/'+output_data_file+CEND)
 
     #mc if(os.path.isfile(output_directory+'/'+output_meta_file)):
     #mc     print(CRED+'Warning: output file '+output_directory+'/'+output_meta_file+ ' exists.'+CEND)
@@ -1373,19 +1380,18 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     pd.set_option('display.max_colwidth', -1)
 
     display(data_df)
-#mc fuck
 #mc     display(meta_df)
     
-    print(CRED+'Writing to json file: '+output_directory+'/'+output_data_file+CEND)
-#mc    print(CRED+'Writing to json file: '+output_directory+'/'+output_meta_file+CEND)
+    print(CRED+'Writing to json file: '+json_directory+'/'+output_data_file+CEND)
+#mc    print(CRED+'Writing to json file: '+json_directory+'/'+output_meta_file+CEND)
     
-    data_df.to_json(r''+output_directory+'/'+output_data_file, orient=json_orient)
+    data_df.to_json(r''+json_directory+'/'+output_data_file, orient=json_orient)
     
-    tidy_json(diag, r''+output_directory+'/'+output_data_file)
+    tidy_json(diag, r''+json_directory+'/'+output_data_file)
     
-#mc     meta_df.to_json(r''+output_directory+'/'+output_meta_file, orient=json_orient)
+#mc     meta_df.to_json(r''+json_directory+'/'+output_meta_file, orient=json_orient)
     
-    # j_df = pd.read_json(r''+output_directory+'/'+output_file, orient=json_orient)
+    # j_df = pd.read_json(r''+json_directory+'/'+output_file, orient=json_orient)
 
     # display(j_df)
     return(0) # end of live_match

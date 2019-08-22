@@ -147,25 +147,16 @@ if(len(input_raw_files) > 0):
         else:
             break
 
-#mc TODAYS_DATE_TIME = datetime.datetime.now()
-
 TODAYS_DATE_TIME = datetime.datetime.today().strftime('YYYY-MM-DD=%Y-%m-%d HH-MM-SS=%H-%M-%S')
-
 
 for cnt,input_file in enumerate(input_raw_files):
     
     input_json_file = just_file_name(diag, input_file)
     
     section, ROUND, match = section_ROUND_match_from_json_filename(diag, json_directory+'/'+input_json_file)
-#mc     input_json_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
 
     print(CGREEN+str(cnt+1)+'/'+str(len(input_raw_files))+': Examining input_json_file='+input_json_file+CEND)
-#mc     print(CGREEN+str(cnt+1)+'/'+str(len(input_raw_files))+': Examining input_json_meta_file='+input_json_meta_file+CEND)
     
-#mc     if(not os.path.exists(json_directory+'/'+input_json_meta_file)):
-#mc         print(json_directory+'/'+input_json_meta_file)
-#mc         raise SystemExit('function: missing meta twin file.'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
     json_match_df = pd.read_json(json_directory+'/'+input_json_file, orient=json_orient)
 
     #display(json_match_df)
@@ -175,12 +166,6 @@ for cnt,input_file in enumerate(input_raw_files):
     if(len(results) != number_of_matches_per_match):
         raise SystemExit('function: len(results)) != number_of_matches_per_match.'+__file__+' line number: '+str(inspect.stack()[0][2]))
     
-#mc    results_teamA = chunk_them(diag, json_match_df['Results Team A'].values, 7)
-#mc    results_teamB = chunk_them(diag, json_match_df['Results Team B'].values, 7)
-    
-#mc    if(len(results_teamA) != len(results_teamB)):
-#mc        raise SystemExit('function: len(results_teamA) != len(results_teamB).'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
     if(True): print('results=',results)
 
         #here we are always overriding result with that from input so that we can display it to make a decision
@@ -189,10 +174,6 @@ for cnt,input_file in enumerate(input_raw_files):
     #exit(0)
 
     override_result = results
-        
-#mc    override_result = []
-#mc    for cnt,results in enumerate(results_teamA):
-#mc        override_result.append( [results_teamA[cnt], results_teamB[cnt] ])
         
     #print('override_result=',override_result)
         
@@ -237,13 +218,13 @@ for cnt,input_file in enumerate(input_raw_files):
             break
 
     if(QUESTION == 'y'):
-#mc         print(CGREEN+'Move '+json_directory+'/'+input_json_meta_file+' to '+validated_json_directory+CEND)
         #could check on value of newPath
         print(CGREEN+'Move '+json_directory+'/'+input_json_file+' to '+temporary_json_directory+CEND)
 
         if(os.path.isfile(temporary_json_directory+'/'+input_json_file)):
-             print(CRED+'Removing '+temporary_json_directory+'/'+input_json_file+CEND) #might like to copy or somethign else later.
-             os.remove(temporary_json_directory+'/'+input_json_file)
+             backup_file = input_json_file+'_'+datetime.datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+             print(CRED+'Moving '+temporary_json_directory+'/'+input_json_file+' to '+temporary_json_directory+'/'+backup_file+CEND)
+             newPath = shutil.move(temporary_json_directory+'/'+input_json_file, temporary_json_directory+'/'+backup_file)
 
         newPath = shutil.move(json_directory+'/'+input_json_file, temporary_json_directory)
         print('newPath=',newPath)
@@ -253,10 +234,7 @@ for cnt,input_file in enumerate(input_raw_files):
         json_match_df.to_json(validated_json_directory+'/'+input_json_file, orient=json_orient)
         tidy_json(diag, validated_json_directory+'/'+input_json_file)
 
-#mc         newPath = shutil.move(json_directory+'/'+input_json_meta_file, validated_json_directory)
-#mc         print('newPath=',newPath)
     else:
-#mc        print(CGREEN+'Not moving these raw file/meta files to validated directory.'+CEND)
         print(CGREEN+'Not moving this raw file to validated directory.'+CEND)
     
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))

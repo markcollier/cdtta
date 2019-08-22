@@ -252,6 +252,8 @@ section_team_composition_df = pd.DataFrame({'Section': section_list, \
 
 display(section_team_composition_df)
 
+section_team_composition_df.to_json(json_directory+'/'+'section_team_composition.json')
+
 ################################################################################
 ################################################################################
 
@@ -499,8 +501,6 @@ if(override_draw):
 ################################################################################
 ################################################################################
 
-
-#fuck, fix
 #draw_all_df = make_draw(diag, all_sections_all_rounds, YYYYMMDD)
 #exit(0)
 
@@ -596,17 +596,14 @@ for round0 in range(number_rounds):
                 tables0.append(all_sections_all_rounds_tables[section0][round0][match0])
             #results0.append(empty_5xN)
             
+########################################################################################################################################################################################
+
             input_json_file = 'section_'+'{0:02d}'.format(section0+1)+'_round_'+'{0:02d}'.format(round0+1)+'_match_'+'{0:02d}'.format(match0+1)+'_data.json'
             #test json files and load data if required:
             file1 = json_directory+'/'+input_json_file
             file2 = validated_json_directory+'/'+input_json_file
             if(os.path.exists(file1) and os.path.exists(file2)):
                 raise SystemExit('os.path.exists(file1) and os.path.exists(file2), sort this out before we can continue.'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
-#json_status = 0 #ignore files in main_draw_df creation.
-#json_status = 1 #read only validated files
-#json_status = 2 #read only raw files
-#json_status = 3 #read both validated and raw files
 
             iswitch = 0
             if(json_status > 0):
@@ -627,6 +624,8 @@ for round0 in range(number_rounds):
 
             if(iswitch == 0):
                 results0.append(empty_5xN)
+
+########################################################################################################################################################################################
       
                 #print(match_5xN(False, j_df, number_of_games_per_match))
             
@@ -693,87 +692,6 @@ pd.set_option('display.max_colwidth', -1)
 display(full_table_df)
 
 full_table_df.to_json(json_directory+'/'+'full_table.json')
-
-################################################################################
-################################################################################
-
-team_rank,player_rank = reset_team_player_rank(diag, section_team_composition_df)
-
-#print('team_rank=',team_rank)
-
-full_table_df_shape = full_table_df.shape
-#print( full_table_df.info(verbose=False) )
-#print( full_table_df_shape )
-
-for unique_match_no0 in range(full_table_df_shape[0]):
-    #print('unique_match_no0=',unique_match_no0)
-    
-    section = full_table_df.loc[unique_match_no0,:]['Section']
-    ROUND = full_table_df.loc[unique_match_no0,:]['Round']
-    match = full_table_df.loc[unique_match_no0,:]['Match']
-    
-    #print('section,ROUND,match=',section,ROUND,match)
-    
-    override_result = None
-    team_sheet_df, summary_df = match_team_summary(diag, full_table_df, section, ROUND, match, False, number_of_games_per_match, number_of_matches_per_match, override_result)
-    
-    if(type(team_sheet_df) == type(None) and type(summary_df) != type(None)):
-        raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-    if(type(team_sheet_df) != type(None) and type(summary_df) == type(None)):
-        raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-        
-    if(type(team_sheet_df) != type(None) and type(summary_df) != type(None)):
-        print(CRED+'updating team/player ranking...'+CEND)
-        team_rank = update_team_rank(diag, team_sheet_df, summary_df, team_rank, number_of_games_per_match, number_of_matches_per_match)
-        player_rank = update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_match, number_of_matches_per_match)
-#         print('team_rank=',team_rank)
-#         print('player_rank=',player_rank)
-        
-    #print(team_sheet_df,summary_df)
-    
-if(diag): print('team_rank=',team_rank)
-if(diag): print('player_rank=',player_rank)
-
-#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
-################################################################################
-################################################################################
-
-#number_sections
-
-for section0 in range(number_sections):
-    team_table = {}
-    section_stuff = section_team_composition_df.loc[section_team_composition_df['Section'] == section0+1].values
-    
-    for cnt in range(len(section_stuff)):
-        team_name = section_stuff[cnt][2]
-        #print(cnt,team_name)
-        team_table[team_name] = team_rank[team_name]
-    
-    #print(section0+1,team_table)
-    print_team_table(diag, team_table, section0+1)
-    
-for section0 in range(number_sections):
-    player_table = {}
-    section_stuff = section_team_composition_df.loc[section_team_composition_df['Section'] == section0+1].values
-    
-    #print('section_stuff=',section_stuff)
-
-    for cnt in range(len(section_stuff)):
-        player_names = section_stuff[cnt][3:4+1]
-        #print('player_names=',player_names)
-
-        for player_name in player_names:
-            player_table[player_name] = player_rank[player_name]
-
-    #print(section0+1,player_table)
-    print_player_table(diag, player_table, section0+1)
-
-#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
-################################################################################
-################################################################################
-
 
 ################################################################################
 ################################################################################
