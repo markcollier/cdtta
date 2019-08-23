@@ -29,13 +29,13 @@ import glob
 import shutil
 
 from src.cdtta_funcs import \
-    automatic_table_allocation, \
+    automatic_wooden_table_allocation, \
     check_for_empty, \
     check_match, \
     chunk_them, \
     compare_single_match, \
     current_and_remainder, \
-    generate_tables_per_section, \
+    generate_wooden_tables_per_section, \
     just_file_name, \
     keyboard_entry, \
     live_match, \
@@ -60,7 +60,9 @@ from src.cdtta_funcs import \
     tidy_json, \
     tuple_pair_to_list, \
     update_player_rank, \
-    update_team_rank
+    update_team_rank, \
+    append_df_to_html, \
+    concat_files
 
 ################################################################################
 ################################################################################
@@ -176,6 +178,16 @@ if(diag): print('player_rank=',player_rank)
 
 number_sections = 6 #get rid of this later...automate.
 
+team_table_html = 'cdtta_thursday_night_json/html/team_table_df.html'
+
+player_table_html = 'cdtta_thursday_night_json/html/player_table_df.html'
+
+if(os.path.exists(team_table_html)):
+    os.remove(team_table_html)
+
+if(os.path.exists(player_table_html)):
+    os.remove(player_table_html)
+
 for section0 in range(number_sections):
     team_table = {}
     section_stuff = section_team_composition_df.loc[section_team_composition_df['Section'] == section0+1].values
@@ -186,7 +198,7 @@ for section0 in range(number_sections):
         team_table[team_name] = team_rank[team_name]
     
     #print(section0+1,team_table)
-    print_team_table(diag, team_table, section0+1)
+    print_team_table(diag, team_table, section0+1, team_table_html)
     
 for section0 in range(number_sections):
     player_table = {}
@@ -202,11 +214,11 @@ for section0 in range(number_sections):
             player_table[player_name] = player_rank[player_name]
 
     #print(section0+1,player_table)
-    print_player_table(diag, player_table, section0+1)
+    print_player_table(diag, player_table, section0+1, player_table_html)
 
 #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
 ################################################################################
 ################################################################################
 
-exit()
+exit(0)

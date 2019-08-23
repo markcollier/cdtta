@@ -380,9 +380,6 @@ def match_5xN(diag, df, number_of_games_per_match, number_of_matches_per_match):
     '''
     out_list = []
 
-#mc    teamA = chunk_them(diag, df.sort_values(by=['Unique game'])['Results Team A'].tolist(), N)
-#mc    teamB = chunk_them(diag, df.sort_values(by=['Unique game'])['Results Team B'].tolist(), N)
-
     results = df.sort_values(by=['Unique Match'])['Result']
 
     if(diag): print('results=',results)
@@ -392,13 +389,6 @@ def match_5xN(diag, df, number_of_games_per_match, number_of_matches_per_match):
 
     if(diag): print('out_list=',out_list)
 
-#mc    exit(0)
-
-#mc    if(diag): print('teamA=',teamA)
-#mc    if(diag): print('teamB=',teamB)
-
-#mc    for n in range(5):
-#mc        out_list.append([teamA[n], teamB[n]])
     return(out_list) #end of match_5xN
 
 ################################################################################
@@ -830,10 +820,10 @@ def reset_team_player_rank(diag, section_team_composition_df):
 
 ################################################################################
 
-def print_player_table(diag, player_table, section):
+def print_player_table(diag, player_table, section, html_file):
     '''
     Creator: Mark Collier
-    Last Modified: 22 August 2019
+    Last Modified: 23 August 2019
     
     print player leader board dataframe.
     '''
@@ -855,14 +845,19 @@ def print_player_table(diag, player_table, section):
                                    })
 
     display(player_table_df.sort_values(by='Won', ascending=False))
+
+    a = append_df_to_html(diag, player_table_df, html_file)
+
+    #player_table_df.to_html('player_table_df.html', escape=False)
+
     return() # end of print_player_table
 
 ################################################################################
 
-def print_team_table(diag, team_table, section):
+def print_team_table(diag, team_table, section, html_file):
     '''
     Creator: Mark Collier
-    Last Modified: 22 August 2019
+    Last Modified: 23 August 2019
     
     print team leader board dataframe.
     '''
@@ -884,6 +879,11 @@ def print_team_table(diag, team_table, section):
                                    })
 
     display(team_table_df.sort_values(by='Won', ascending=False))
+
+    a = append_df_to_html(diag, team_table_df, html_file)
+
+    #team_table_df.to_html(html_dir+'/'+'team_table_df.html', escape=False)
+
     return() # end of print_player_table
 
 ################################################################################
@@ -1003,6 +1003,8 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     3. flag whether been checked by coordinator
     
     Might need to move validated files to another area, and provide protection for the files.
+
+    This function sets the validation components of the dataframe to defaults, e.g. 'NO'.
     
     Inputs:
     main_df: the main data frame, currently called full_table_df
@@ -1022,10 +1024,15 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     from IPython.display import display
     import os.path
     import string
+    import inspect
     
     CRED = '\033[91m'
     CGREEN = '\033[32m'
     CEND = '\033[0m'
+
+    pd.set_option('display.max_columns', 30)
+    pd.set_option('display.max_rows', 400)
+    pd.set_option('display.max_colwidth', -1)
     
     print('Entering a 0 (zero) at first character for any of the following keyboard entry will reset to beginning.')
     print('Only a file will be written if each section is answered appropriately.')
@@ -1055,8 +1062,6 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
         else:
             break
     
-#mc    TODAYS_DATE_TIME = datetime.datetime.now()
-
     TODAYS_DATE_TIME = datetime.datetime.today().strftime('YYYY-MM-DD=%Y-%m-%d HH-MM-SS=%H-%M-%S')
     
     print(CGREEN+'PERSON ENTERING DATA='+PERSON_ENTERING_DATA+' DATE/TIME (YYYY-MM-DD HH:MM:SS)='+str(TODAYS_DATE_TIME)+CEND)
@@ -1116,7 +1121,6 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     #keep data and meta (scalar) data in separate files...
     
     output_data_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_data.json'
-    #mc output_meta_file = 'section_'+'{0:02d}'.format(section)+'_round_'+'{0:02d}'.format(ROUND)+'_match_'+'{0:02d}'.format(match)+'_meta.json'
 
     if(os.path.isfile(json_directory+'/'+output_data_file) and os.path.isfile(validated_json_directory+'/'+output_data_file)):
         print(CRED+'Warning: raw & validated output file exist... '+CEND)
@@ -1129,11 +1133,6 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     else:
         print(CGREEN+'Output file=',json_directory+'/'+output_data_file+CEND)
 
-    #mc if(os.path.isfile(output_directory+'/'+output_meta_file)):
-    #mc     print(CRED+'Warning: output file '+output_directory+'/'+output_meta_file+ ' exists.'+CEND)
-    #mc else:
-    #mc     print(CGREEN+'Output file=',output_directory+'/'+output_meta_file+CEND)
-        
     # def padded_integer_match(diag, keyboard_entry):
     #     '''
     #     '''
@@ -1210,7 +1209,6 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
         fillins = [ [['NO'],['NO']], [['NO'],['NO']], [['NO'],['NO']], [['NO'],['NO']], [['NO'],['NO']], ]
 
     print('fillins=',fillins)
-
 
 ###############################################################################################################
 
@@ -1302,6 +1300,27 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
             print('Try again.')
             continue
 
+    for n in range(999):
+        try:
+            QUESTION = input(CRED+'Do you want to add any comments to this match [y/n or 0=break]? '+CEND)
+        except:
+            print('Try again.')
+            continue
+
+        if(QUESTION.isdigit() and int(QUESTION) == 0):
+            raise SystemExit('function: Exiting Validation.'+__file__+' line number: '+str(inspect.stack()[0][2]))
+        elif(QUESTION != 'y' and QUESTION != 'n'):
+            print('Only "y" or "n", try again.')
+            continue
+        else:
+            break
+
+    COMMENT = None
+    if(QUESTION == 'y'):
+        COMMENT = input('Add your one line comment [a \'$\' will add linebreak in the output] :\n')
+
+    #print('COMMENT=',COMMENT)
+
     #print('match1_join=',match1_join)
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
     # match1_join = keyboard_entry(diag, dummy1)
@@ -1313,6 +1332,12 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     teamA = match1_join[0] + match2_join[0] + match3_join[0] + match4_join[0] + match5_join[0]
     teamB = match1_join[1] + match2_join[1] + match3_join[1] + match4_join[1] + match5_join[1]
 
+    results = [match1_join, match2_join, match3_join, match4_join, match5_join]
+
+    #print('results=',results)
+    #print('len(results)=',len(results))
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
     # print(teamA)
     # print(teamB)
     #print('k2=',k2)
@@ -1321,8 +1346,6 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     # _,_ = check_match(diag, k1)
     # _,_ = check_match(diag, k2)
     # _,_ = compare_single_match(diag, k1, k2)
-    # raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
 
     # teamA = [9,11,9,11,9,11,9, 9,11,9,11,9,11,9, 9,11,9,11,9,11,9, 9,11,9,11,9,11,9, 9,11,9,11,9,11,9]
     # teamB = [11,9,11,9,11,9,11, 11,9,11,9,11,9,11, 11,9,11,9,11,9,11, 11,9,11,9,11,9,11, 11,9,11,9,11,9,11]
@@ -1331,29 +1354,13 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
 
     games = list(range(1,number_of_games_per_match+1)) * number_of_matches_per_match
     
-#mc     data_df = pd.DataFrame({ \
-#mc                                 'Unique game': range(1,len(games)+1), \
-#mc                                 'Section' : [section] * len(games), \
-#mc                                 'Round' : [ROUND] * len(games), \
-#mc                                 'Match' : [match] * len(games), \
-#mc                                 'Games': games, \
-#mc                                 'Results Team A' : teamA, \
-#mc                                 'Results Team B' : teamB, \
-#mc #                                 'Entry Person' : [PERSON_ENTERING_DATA] * len(games), \
-#mc #                                 'Date/Time Creation': [TODAYS_DATE_TIME] * len(games),\
-#mc                       })
-#mc      
-#mc     meta_df = pd.DataFrame([{ \
-#mc                                 'Entry Person': PERSON_ENTERING_DATA, \
-#mc                                 'Date/Time Creation': TODAYS_DATE_TIME}])
-
     team1_player1 = match_extract_df['Team1 Player1'].values.tolist()[0].strip()
     team1_player2 = match_extract_df['Team1 Player2'].values.tolist()[0].strip()
 
     team2_player1 = match_extract_df['Team2 Player1'].values.tolist()[0].strip()
     team2_player2 = match_extract_df['Team2 Player2'].values.tolist()[0].strip()
 
-    data_df = pd.DataFrame({ \
+    raw_match_df = pd.DataFrame({ \
       'Unique Match' : [unique_match] * number_of_matches_per_match, \
       'Entry Person'       : [PERSON_ENTERING_DATA] * number_of_matches_per_match, \
       'Creation Date/Time' : [TODAYS_DATE_TIME] * number_of_matches_per_match, \
@@ -1369,27 +1376,41 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
       'PlayerA/B X/Y'      : [ [['Team A/B Player A'],['Team X/Y Player A']], [['Team A/B Player B'],['Team X/Y Player B']], [['Team A/B Player B'],['Team X/Y Player A']], [['Team A/B Player A'],['Team X/Y Player B']], [['Doubles A/B'],['Doubles X/Y']], ], \
       'Player Names'       : [ [[team1_player1],[team2_player1]], [[team1_player2],[team2_player2]], [[team1_player2],[team2_player1]], [[team1_player1],[team2_player2]], [['Doubles A/B'],['Doubles X/Y']], ], \
       'Fillin Playes Names': fillins, \
-      'Result'             : [ [[11,11,11,11,0,0,0], [3,4,5,6,0,0,0]], [[11,11,11,11,0,0,0], [8,8,8,8,0,0,0]], [[11,11,11,11,0,0,0], [9,8,7,6,0,0,0]], [[13,13,13,13,0,0,0], [11,11,11,11,0,0,0]], [[11,11,11,11,0,0,0], [1,1,1,1,0,0,0]] ], \
+      'Result'             : results, \
       'Validated'          : ['NO'] * number_of_matches_per_match, \
       'Validated Date/Time': ['NO'] * number_of_matches_per_match, \
       'Validation Person'  : ['NO'] * number_of_matches_per_match, \
    })
 
+#      'Result'             : [ [[11,11,11,11,0,0,0], [3,4,5,6,0,0,0]], [[11,11,11,11,0,0,0], [8,8,8,8,0,0,0]], [[11,11,11,11,0,0,0], [9,8,7,6,0,0,0]], [[13,13,13,13,0,0,0], [11,11,11,11,0,0,0]], [[11,11,11,11,0,0,0], [1,1,1,1,0,0,0]] ], \
+
     pd.set_option('display.max_columns', 30)
     pd.set_option('display.max_rows', 400)
     pd.set_option('display.max_colwidth', -1)
 
-    display(data_df)
-#mc     display(meta_df)
+    display(raw_match_df)
     
     print(CRED+'Writing to json file: '+json_directory+'/'+output_data_file+CEND)
-#mc    print(CRED+'Writing to json file: '+json_directory+'/'+output_meta_file+CEND)
+
+    raw_match_df.to_html(json_directory+'/html/'+'raw_match.html')
     
-    data_df.to_json(r''+json_directory+'/'+output_data_file, orient=json_orient)
+    raw_match_df.to_json(r''+json_directory+'/'+output_data_file, orient=json_orient)
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
     
     tidy_json(diag, r''+json_directory+'/'+output_data_file)
-    
-#mc     meta_df.to_json(r''+json_directory+'/'+output_meta_file, orient=json_orient)
+
+    if(type(COMMENT) != type(None)):
+        fhR = open(json_directory+'/'+'README', 'a')
+        fhR.write('################################################################################\n')
+        fhR.write(datetime.datetime.today().strftime('YYYY-MM-DD=%Y-%m-%d HH-MM-SS=%H-%M-%S\n'))
+
+        for token in COMMENT.split('$'):
+            fhR.write(token.strip()+'\n')
+        fhR.write('################################################################################\n')
+        fhR.close()
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
     
     # j_df = pd.read_json(r''+json_directory+'/'+output_file, orient=json_orient)
 
@@ -1504,38 +1525,6 @@ def make_draw(diag, all_sections_all_rounds, YYYYMMDD):
 
 ################################################################################
 
-#mc def tidy_json(diag, input_output_file):
-#mc     '''
-#mc     Creator: Mark Collier
-#mc     Last Modified: 19 August 2019
-#mc     
-#mc     Minor changes to make the json file more readable. Current version will overwrite file given.
-#mc     
-#mc     Inputs:
-#mc     input file
-#mc 
-#mc     Outputs:
-#mc     output_file
-#mc     '''
-#mc     import inspect
-#mc     
-#mc     ifh = open(input_output_file)
-#mc     for i,line in enumerate(ifh):
-#mc         line = line.replace(',{"Unique',',\n{"Unique')
-#mc         if(diag): print(line)
-#mc     ifh.close()
-#mc     
-#mc     if(diag): print('i=',i)
-#mc         
-#mc     if(i!=0):
-#mc         raise SystemExit('tidy_json: i.ne.0:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-
-#mc     ofh = open(input_output_file, 'w')
-#mc     print(line,file=ofh)
-#mc     ofh.close()
-#mc     
-#mc     return() #end of tidy_json
-
 def tidy_json(diag, input_output_file):
     '''
     Creator: Mark Collier
@@ -1561,7 +1550,7 @@ def tidy_json(diag, input_output_file):
         if(diag): print(line)
     ifh.close()
 
-    if(diag): print('i=',i)
+    if(True): print('i=',i)
 
     if(i!=0):
         raise SystemExit('tidy_json: i.ne.0:'+__file__+' line number: '+str(inspect.stack()[0][2]))
@@ -1598,27 +1587,27 @@ def reduce_size_to_section_size(diag, tables, tables_per_section):
 
 ################################################################################
 
-def generate_tables_per_section(diag, number_teams_per_section):
+def generate_wooden_tables_per_section(diag, number_teams_per_section):
     '''
     Creator: Mark Collier
     Last Modified: 20 August 2019
     
     Inputs:
     number_teams_per_section e.g. [4, 6, 6, 6, 6, 4]
-    tables_per_section
+    wooden_tables_per_section
 
     Outputs:
-    tables per section e.g. [2, 3, 3, 3, 3, 2]
+    wooden_tables per section e.g. [2, 3, 3, 3, 3, 2]
     '''
     
-    tables_per_section = []
+    wooden_tables_per_section = []
     for teams in number_teams_per_section:
-        tables_per_section.append(int(teams/2))
-    return(tables_per_section) #end of generate_tables_per_section
+        wooden_tables_per_section.append(int(teams/2))
+    return(wooden_tables_per_section) #end of generate_wooden_tables_per_section
 
 ################################################################################
 
-def automatic_table_allocation(diag, number_teams_per_section, number_rounds, groups_of_n, table_max, table_init):
+def automatic_wooden_table_allocation(diag, number_teams_per_section, number_rounds, groups_of_n, wooden_table_max, wooden_table_init):
     '''
     Creator: Mark Collier
     Last Modified: 20 August 2019
@@ -1627,8 +1616,8 @@ def automatic_table_allocation(diag, number_teams_per_section, number_rounds, gr
     number_teams_per_section e.g. [4, 6, 6, 6, 6, 4]
     number_rounds e.g. 10
     groups_of_n e.g. 3, this number is the largest section size
-    table_max e.g. 22, this is the largest table number that can be used
-    table_init e.g. 11, this is the first table to start to use, 11 corresponds to the first table in the new room.
+    wooden_table_max e.g. 22, this is the largest table number that can be used
+    wooden_table_init e.g. 11, this is the first table to start to use, 11 corresponds to the first table in the new room.
 
     Outputs:
     list of [[[ section, round ]]]
@@ -1642,56 +1631,56 @@ def automatic_table_allocation(diag, number_teams_per_section, number_rounds, gr
     
     import inspect
     
-    tables_per_section = generate_tables_per_section(diag, number_teams_per_section)
+    wooden_tables_per_section = generate_wooden_tables_per_section(diag, number_teams_per_section)
     
-    tables_basic_round = []
+    wooden_tables_basic_round = []
     for section0 in range(len(number_teams_per_section)):
 
-        if(diag): print('section0,table_init=',section0,table_init)
+        if(diag): print('section0,wooden_table_init=',section0,wooden_table_init)
 
-        table_section = []
-        for table in range(groups_of_n):
-            table_now = table_init + table
+        wooden_table_section = []
+        for wooden_table in range(groups_of_n):
+            wooden_table_now = wooden_table_init + wooden_table
 
-            if(table_now > table_max):
-                table_now = table_now - table_max
+            if(wooden_table_now > wooden_table_max):
+                wooden_table_now = wooden_table_now - wooden_table_max
 
-            table_section.append(table_now)
+            wooden_table_section.append(wooden_table_now)
 
-        if(diag): print('before: table_section=',table_section)
+        if(diag): print('before: wooden_table_section=',wooden_table_section)
 
         icheck = 0
         for n in range(groups_of_n-1):
-            if(table_section[n] > table_section[n+1]):
-                print('table_section[n] > table_section[n+11]')
+            if(wooden_table_section[n] > wooden_table_section[n+1]):
+                print('wooden_table_section[n] > wooden_table_section[n+11]')
                 icheck +=1
 
         if(diag): print('icheck=',icheck)
 
         if(icheck!=0):
-            imin = min(table_section)
+            imin = min(wooden_table_section)
             if(diag): print('imin=',imin)
 
             for n in range(gropus_of_n):
-                table_section[n] = imin+n
-            table_init = imin + gropus_of_n
+                wooden_table_section[n] = imin+n
+            wooden_table_init = imin + gropus_of_n
         else:
-            table_init += groups_of_n
+            wooden_table_init += groups_of_n
 
-        if(table_init > table_max):
-            table_init = table_init - table_max
+        if(wooden_table_init > wooden_table_max):
+            wooden_table_init = wooden_table_init - wooden_table_max
 
-        if(diag): print('after: table_section=',table_section)
+        if(diag): print('after: wooden_table_section=',wooden_table_section)
 
-        tables_basic_round.append(table_section)
+        wooden_tables_basic_round.append(wooden_table_section)
 
-    if(diag): print('tables_basic_round=',tables_basic_round)
+    if(diag): print('wooden_tables_basic_round=',wooden_tables_basic_round)
 
-    n_rounds = tables_basic_round *12 #choose some big number probably nrounds+1 or nrounds+2
+    n_rounds = wooden_tables_basic_round *12 #choose some big number probably nrounds+1 or nrounds+2
 
     #print('n_rounds=',n_rounds)
 
-    all_rounds_table_allocation = []
+    all_rounds_wooden_table_allocation = []
 
     number_sections = len(number_teams_per_section)
 
@@ -1705,45 +1694,44 @@ def automatic_table_allocation(diag, number_teams_per_section, number_rounds, gr
 
         #print('round0,n_rounds[smin0:smax0+1]=',round0,n_rounds[smin0:smax0+1])
 
-        current_round_table_allocation = reduce_size_to_section_size(diag, n_rounds[smin0:smax0+1], tables_per_section)
+        current_round_wooden_table_allocation = reduce_size_to_section_size(diag, n_rounds[smin0:smax0+1], wooden_tables_per_section)
 
         xycheck = []
-        for x in current_round_table_allocation:
+        for x in current_round_wooden_table_allocation:
             for y in x:
                 xycheck.append(y)
             
 
         if(len(xycheck) != len(list(set(xycheck)))):
-            print('current_round_table_allocation=',current_round_table_allocation)
+            print('current_round_wooden_table_allocation=',current_round_wooden_table_allocation)
             print('xycheck=',xycheck)
-            raise SystemExit('automatic_table_allocation: dupliate tables, reduce sections and/or section sizes:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+            raise SystemExit('automatic_wooden_wooden_table_allocation: dupliate wooden_tables, reduce sections and/or section sizes:'+__file__+' line number: '+str(inspect.stack()[0][2]))
             
-        all_rounds_table_allocation.append(current_round_table_allocation)
-        if(diag): print('round0,current_round_table_allocation=',CRED+str(round0)+CEND,current_round_table_allocation)
+        all_rounds_wooden_table_allocation.append(current_round_wooden_table_allocation)
+        if(diag): print('round0,current_round_wooden_table_allocation=',CRED+str(round0)+CEND,current_round_wooden_table_allocation)
 
-    if(diag): print('all_rounds_table_allocation=',all_rounds_table_allocation)
+    if(diag): print('all_rounds_wooden_table_allocation=',all_rounds_wooden_table_allocation)
     
     #reorder array to be as required:
-    all_sections_all_rounds_tables = []
+    all_sections_all_rounds_wooden_tables = []
     for section0 in range(number_sections): 
         j = []
         for round0 in range(number_rounds):
-            j.append( all_rounds_table_allocation[round0][section0] )
-        all_sections_all_rounds_tables.append(j)
+            j.append( all_rounds_wooden_table_allocation[round0][section0] )
+        all_sections_all_rounds_wooden_tables.append(j)
 
-    if(diag): print('all_sections_all_rounds_tables=',all_sections_all_rounds_tables)
+    if(diag): print('all_sections_all_rounds_wooden_tables=',all_sections_all_rounds_wooden_tables)
 
-    return(all_sections_all_rounds_tables) # end of automatic_table_allocation
+    return(all_sections_all_rounds_wooden_tables) # end of automatic_wooden_table_allocation
 
 ################################################################################
 
 def just_file_name(diag, full_name):
     '''
-    
-    Extract file name from end of a directory/filename path.
-    
     Creator: Mark Collier
     Last Modified: 21 August 2019
+
+    Extract file name from end of a directory/filename path.
     
     Inputs:
 
@@ -1812,7 +1800,7 @@ def pennant_names(diag, what, pennant):
         elif(pennant == 'Wednesday_Night'):
              return(['Taylor, Ben', 'Gin, Darian', 'Ghani, Shahid', 'Waterman, Keith', 'Smith, Jakob', 'D\’Amico, Scott', 'Menzies, Andrew', 'Datta, Raj', 'Nemenyi, Endre', 'Brindley, Aviva', 'Gardner, Mackenzie', 'Rodriguez, JC', 'Paul, Liviston', 'Majumdar, Sourav', 'Jones, Warren', 'Gormann, Ben', 'Roy, Phillip', 'Evans, Richard P', 'Evans, Bruce', 'Kwan, Justin', 'Smith, Greg', 'Cunningham, Bobby', 'Spizzica, Tony', 'Hayden, Ryan', 'Maranan, Jesse', 'Jefimenko, Walter', 'Hewitt, Gerard', 'Qin, Allen', 'Tsao, Justin', 'Hayes, Simon', 'Cauchi, Travis', 'Cheung, Adrian', 'Simons, Shane', 'Hayden, Shane', 'Cung, Robert', 'Neil, Alan', 'Khan, Inaaya', 'Brincat, Tony', 'Stewart, Craig', 'Julian, Rebecca', 'Marsden, Bob', 'Perkins, Shaun', 'Bignell, Quentin', 'Jafarzadeh, Jason', 'Perkins, David', 'Morella, Alex', 'Eddy, Chris', 'McConnell, Nick', 'Mehravar, Hassan', 'Evans, Shaun', 'Chew, Valentine', 'Woodlock, Ron', 'Menz, Garry', 'Petch, David', 'Herweynen, Ed', 'Brown, Andrew', 'Hayden, Chris', 'Jones, Cameron', 'Hassanikhoo, Hamid', 'Conroy, Mark', 'Van Koll, Marinus', 'Wachter, Matt', 'Floyd, Dannie', 'Atalla, Maged', 'Byrne, Jason', 'Evans, Steve', 'Shamakhy, Alireza', 'Cao, Tingting', 'Gray, Kaitlyn', 'Anderson, Caleb', 'Puts, Arnold', 'Balsillie, Terry', 'Thompson, Nick', 'Safir, Amir', 'McGuire, Johnathon', 'Morales, Orangel', 'Martus, Maria', 'Anderson, Daniel', 'Rowland, David', 'Chegini, Fereshteh'])
         elif(pennant == 'Thursday_Night'):
-             return(['Bhiwarkar, Mangesh', 'Keating, John', 'Pilz, Lothar', 'Harris, Lachlan', 'Weighell, Michael', 'Harrison, Leigh', 'Collier, Mark', 'Gubicak, Peter', 'Signor, Dominic', 'Goodridge, Robert', 'Kung, Bernard', 'Signor, Sergio', 'Dyer, Terry', 'Goepfert, Paul', 'Holt, Ben', 'Straughair, Thomas', 'Talolin, Nick', 'Oldham, Cameron', 'Probyn-Smith, Garth', 'Jung, Tad', 'Ryan, Paul', 'Zeng, Jimmy', 'Jefimenko, Paul', 'Morgan, Shane', 'Lee, Johnson', 'Mcerlain, Peter', 'Powell, John', 'Howse, Kalan', 'Mendes, Champ', 'Mazzaferri, Michael', 'Salgueiro, Fernando', "O'Regan, Brendan", 'Zdimirovic, Zoltan', 'Goodwin, Jim', 'Smythe, David', 'Blattman, Ben', 'Byrne, Jason', 'Thompson, David', 'Shamakhy, Alireza', 'Ryan, Chris', 'Ponsonby, Mark', 'Thomson, Jamie', 'Hyde, David', 'Harrison, Schae', 'Emam, Arash', 'Mazzaferri, Henry', 'Darlow, Anthony', 'Harrison, Peter', 'Timmermans,David', 'Van Veen, Peter', 'Rewell, Luke', 'Symes, Brendon', 'Mujica, Jose', 'Short, Craig', 'Ballment, Meg', 'Salgueiro, Christian', 'Wakefield, Paul', 'Falconer, Colin', 'Powell, Robyn', 'Florey, Linda', 'Dodson, Michelle', 'Jordan, Julia', 'Winsemius, Karen', 'Nguyen, Khanh'])
+             return(['Bhiwarkar, Mangesh', 'Keating, John', 'Pilz, Lothar', 'Harris, Lachlan', 'Weighell, Michael', 'Harrison, Leigh', 'Collier, Mark', 'Bellamy, Graham', 'Signor, Dominic', 'Goodridge, Robert', 'Kung, Bernard', 'Signor, Sergio', 'Dyer, Terry', 'Goepfert, Paul', 'Holt, Ben', 'Straughair, Thomas', 'Talolin, Nick', 'Oldham, Cameron', 'Probyn-Smith, Garth', 'Jung, Tad', 'Ryan, Paul', 'Zeng, Jimmy', 'Jefimenko, Paul', 'Morgan, Shane', 'Lee, Johnson', 'Mcerlain, Peter', 'Powell, John', 'Howse, Kalan', 'Mendes, Champ', 'Mazzaferri, Michael', 'Salgueiro, Fernando', "O'Regan, Brendan", 'Zdimirovic, Zoltan', 'Goodwin, Jim', 'Smythe, David', 'Blattman, Ben', 'Byrne, Jason', 'Thompson, David', 'Shamakhy, Alireza', 'Ryan, Chris', 'Ponsonby, Mark', 'Thomson, Jamie', 'Hyde, David', 'Harrison, Schae', 'Emam, Arash', 'Mazzaferri, Henry', 'Darlow, Anthony', 'Harrison, Peter', 'Timmermans,David', 'Van Veen, Peter', 'Rewell, Luke', 'Symes, Brendon', 'Mujica, Jose', 'Short, Craig', 'Ballment, Meg', 'Salgueiro, Christian', 'Wakefield, Paul', 'Falconer, Colin', 'Powell, Robyn', 'Florey, Linda', 'Dodson, Michelle', 'Jordan, Julia', 'Winsemius, Karen', 'Nguyen, Khanh'])
         else:
             raise SystemExit('pennant_names: "pennant" can be only "Morning_Morning/Thursday_Mornin/Wednesday_Night/Thursday_Night":'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
@@ -1820,5 +1808,68 @@ def pennant_names(diag, what, pennant):
         raise SystemExit('pennant_names: "what" can be only "Team_Names" or "Player_Names":'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     return(0)
+
+################################################################################
+
+def concat_files(diag, files):
+    '''
+    Creator: Mark Collier
+    Last Modified: 21 August 2019
+
+    concat 2 or more files, last file in list is the output file.
+    
+    Inputs:
+    a list of files
+
+    Outputs:
+    last element of files is used for output name
+    '''
+
+    with open(files[-1], 'w') as outfile:
+        for fname in files[0:-1]:
+            with open(fname) as infile:
+                outfile.write(infile.read())
+
+    return(0) # end of concat_files
+
+################################################################################
+
+def append_df_to_html(diag, df, html_file):
+    '''
+    Creator: Mark Collier
+    Last Modified: 21 August 2019
+
+    append html from a dataframe if html exists, otherwise make it.
+    
+    Inputs:
+    df to print to html file (this can be opened with a browser).
+
+    Outputs:
+    output file html_file
+    '''
+    import os
+    import datetime
+    import shutil
+    from datetime import timedelta
+
+    onesecond = timedelta(seconds=1)
+
+    if(not os.path.exists(html_file)):
+        df.to_html(html_file, escape=False)
+    else:
+        html_tmp1 = '/tmp/html_'+(datetime.datetime.today()+timedelta(seconds=0)).strftime('%Y-%m-%d-%H-%M-%S')
+        html_tmp2 = '/tmp/html_'+(datetime.datetime.today()+timedelta(seconds=-10)).strftime('%Y-%m-%d-%H-%M-%S')
+
+        if(diag): print(html_tmp1)
+        if(diag): print(html_tmp1)
+
+        df.to_html(html_tmp1, escape=False)
+
+        files = [html_file, html_tmp1, html_tmp2]
+        concat_files(diag, files)
+        shutil.move(html_tmp2, html_file)
+        os.remove(html_tmp1)
+       
+    return(0) # end of append_df_html
 
 ################################################################################

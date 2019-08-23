@@ -31,13 +31,13 @@ import glob
 import shutil
 
 from src.cdtta_funcs import \
-    automatic_table_allocation, \
+    automatic_wooden_table_allocation, \
     check_for_empty, \
     check_match, \
     chunk_them, \
     compare_single_match, \
     current_and_remainder, \
-    generate_tables_per_section, \
+    generate_wooden_tables_per_section, \
     just_file_name, \
     keyboard_entry, \
     live_match, \

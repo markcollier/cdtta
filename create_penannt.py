@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env ipython
+##!/usr/bin/env python3
 
 diag = True
 diag = False
@@ -29,13 +30,13 @@ import glob
 import shutil
 
 from src.cdtta_funcs import \
-    automatic_table_allocation, \
+    automatic_wooden_table_allocation, \
     check_for_empty, \
     check_match, \
     chunk_them, \
     compare_single_match, \
     current_and_remainder, \
-    generate_tables_per_section, \
+    generate_wooden_tables_per_section, \
     just_file_name, \
     keyboard_entry, \
     live_match, \
@@ -71,7 +72,7 @@ Pennant = "Thursday Night"
 # Pennant = "Thursday Morning"
 
 override_draw = False #force order of matches to be that given online/printed. Future seasons will use my ordering.
-override_table = False
+override_wooden_table = False
 
 #json_status = 0 #ignore files in main_draw_df creation.
 #json_status = 1 #read only validated files
@@ -101,7 +102,7 @@ elif(Pennant=="Thursday Night"):
     number_of_games_per_match = 7
     number_of_matches_per_match = 5
     override_draw = True #force order of matches to be that given online/printed. Future seasons will use my ordering.
-    override_table = True #force table allocation to be that given online/printed. Future seasons will use my ordering.
+    override_wooden_table = True #force table allocation to be that given online/printed. Future seasons will use my ordering.
     #override_table = False
     
 elif(Pennant=="Monday Morning"):
@@ -153,6 +154,11 @@ if(not os.path.exists(json_directory)):
 
 if(not os.path.exists(validated_json_directory)):
     raise SystemExit('function: validated_json_directory doesnt exist.'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+#not really necessary as live_entry will add a comment to a README if it doesn't exist.
+if(not os.path.exists(json_directory+'/'+'README')):
+    print('Pennant README doesnt exist, create it.')
+    open(json_directory+'/'+'README','a').close()
 
 json_orient = 'split'
 json_orient = 'records'
@@ -251,6 +257,8 @@ section_team_composition_df = pd.DataFrame({'Section': section_list, \
                   })
 
 display(section_team_composition_df)
+
+section_team_composition_df.to_html(json_directory+'/html/'+'section_team_composition_df.html', escape=False)
 
 section_team_composition_df.to_json(json_directory+'/'+'section_team_composition.json')
 
@@ -409,27 +417,29 @@ groups_of_n = 3
 #comment out if testing above:
 groups_of_n = 3 #this number is to be the size of the largest table requirement of a section.
 
-table_max = 22 #do not allocate beyond 22. Table 23 is reserve for training, so good to keep one space at least.
+wooden_table_max = 22 #do not allocate beyond 22. Table 23 is reserve for training, so good to keep one space at least.
 
-table_init = 11 #start from this table, which is the first table in the new room.
+wooden_table_init = 11 #start from this table, which is the first table in the new room.
 
-all_sections_all_rounds_tables = automatic_table_allocation(diag, number_teams_per_section, number_rounds, groups_of_n, table_max, table_init)
+all_sections_all_rounds_wooden_tables = automatic_wooden_table_allocation(diag, number_teams_per_section, number_rounds, groups_of_n, wooden_table_max, wooden_table_init)
 
 #print('all_sections_all_rounds_tables=', all_sections_all_rounds_tables)
 
-table_allocation_dict = {}
-table_allocation_dict['Round'] = range(1,number_rounds+1)
+wooden_table_allocation_dict = {}
+wooden_table_allocation_dict['Round'] = range(1,number_rounds+1)
 for section0 in range(len(number_teams_per_section)):
-    table_allocation_dict['Section '+str(section0+1)] = all_sections_all_rounds_tables[section0]
+    wooden_table_allocation_dict['Section '+str(section0+1)] = all_sections_all_rounds_wooden_tables[section0]
 
-table_allocation_df = pd.DataFrame(table_allocation_dict)
+wooden_table_allocation_df = pd.DataFrame(wooden_table_allocation_dict)
 
-display(table_allocation_df)
+#wooden_table_allocation_df.to_html(json_directory+'/html/'+'wooden_table_allocation_df.html', escape=False)
+
+display(wooden_table_allocation_df)
 
 ################################################################################
 ################################################################################
 
-all_sections_all_rounds_tables_override = [ \
+all_sections_all_rounds_wooden_tables_override = [ \
 [ [11,12],    [14,15],    [17,18],    [20,21],    [1, 2],     [4,5],      [11,12],    [14,15],    [17,18],    [20,21] ], \
 [ [13,14,15], [16,17,18], [19,20,21], [1,2,3],    [3,4,5],    [11,12,13], [13,14,15], [16,17,18], [19,20,21], [1,2,3] ], \
 [ [16,17,18], [19,20,21], [1,2,3],    [4,5,6],    [11,12,13], [14,15,16], [16,17,18], [19,20,21], [1,2,3],    [4,5,6] ], \
@@ -438,22 +448,26 @@ all_sections_all_rounds_tables_override = [ \
 [ [4,5],      [11,12],    [14,15],    [17,18],    [20,21],    [2,3],      [4,5],      [11,12],    [14,15],    [17,18] ], \
 ]
 
-table_allocation_dict = {}
-table_allocation_dict['Round'] = range(1,number_rounds+1)
+wooden_table_allocation_dict = {}
+wooden_table_allocation_dict['Round'] = range(1,number_rounds+1)
 for section0 in range(len(number_teams_per_section)):
-    table_allocation_dict['Section '+str(section0+1)] = all_sections_all_rounds_tables_override[section0]
+    wooden_table_allocation_dict['Section '+str(section0+1)] = all_sections_all_rounds_wooden_tables_override[section0]
 
-table_allocation_override_df = pd.DataFrame(table_allocation_dict)
+wooden_table_allocation_override_df = pd.DataFrame(wooden_table_allocation_dict)
 
-display(table_allocation_override_df)
+display(wooden_table_allocation_override_df)
 
-if(override_table):
-    print(CRED+'Override tables to comform to printed/online version...'+CEND)
-    all_sections_all_rounds_tables = list(all_sections_all_rounds_tables_override)
+if(override_wooden_table):
+    print(CRED+'Override wooden_tables to comform to printed/online version...'+CEND)
+    all_sections_all_rounds_wooden_tables = list(all_sections_all_rounds_wooden_tables_override)
+
+wooden_table_allocation_df = pd.DataFrame(wooden_table_allocation_dict)
+
+wooden_table_allocation_df.to_html(json_directory+'/html/'+'wooden_table_allocation_df.html', escape=False)
     
 #section,ROUND,match = 1,1,1
 
-#print(all_sections_all_rounds_tables[section-1][ROUND-1][match-1]) #.split(',')[0])
+#print(all_sections_all_rounds_wooden_tables[section-1][ROUND-1][match-1]) #.split(',')[0])
 
 ################################################################################
 ################################################################################
@@ -520,11 +534,11 @@ if(override_draw):
 if(json_status == 0):
     print('Ignoring all json files.')
 elif(json_status == 1):
-    print('Reading only validated json files.')
+    print('Reading only validated json files (if the exist).')
 elif(json_status == 2):
-    print('Reading only raw json files.')
+    print('Reading only raw json files (if the exist).')
 elif(json_status == 3):
-    print('Reading both validated and raw json files.')
+    print('Reading both validated and raw json files (if the exist).')
 else:
     raise SystemExit('function: invalid json_status value.'+__file__+' line number: '+str(inspect.stack()[0][2]))
     
@@ -566,14 +580,14 @@ empty_11xN = [         [[], []],  \
 
 current_entries = 0
 
-simple_table = True #create simple table allocation, will not be functinal though.
-simple_table = False
+simple_wooden_table = True #create simple table allocation, will not be functinal though.
+simple_wooden_table = False
 
 for round0 in range(number_rounds):
-    table_this_round0 = -1
+    wooden_table_this_round0 = -1
     for section0 in range(len(number_teams_per_section)):
         for match0 in range(int(number_teams_per_section[section0]/number_players_per_team)):
-            table_this_round0 +=1
+            wooden_table_this_round0 +=1
             
             unique_match0 += 1
 
@@ -590,10 +604,10 @@ for round0 in range(number_rounds):
 
                 #heiden
 
-            if(simple_table):
-                tables0.append(table_this_round0+1)
+            if(simple_wooden_table):
+                tables0.append(wooden_table_this_round0+1)
             else:
-                tables0.append(all_sections_all_rounds_tables[section0][round0][match0])
+                tables0.append(all_sections_all_rounds_wooden_tables[section0][round0][match0])
             #results0.append(empty_5xN)
             
 ########################################################################################################################################################################################
@@ -609,18 +623,25 @@ for round0 in range(number_rounds):
             if(json_status > 0):
                 if(os.path.exists(json_directory+'/'+input_json_file) and (json_status == 2 or json_status == 3)):
                     iswitch += 1
-                    print(CRED+json_directory+'/'+input_json_file+' exists...loading'+CEND)
+                    print(CRED+json_directory+'/'+input_json_file+' exists...loading unvalidated (raw) file...'+CEND)
                     json_match_df = pd.read_json(r''+json_directory+'/'+input_json_file, orient=json_orient)
                     results0.append(match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match))
 
+                    #j = match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match)
+                    #print('j=',j)
+                    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
                 if(os.path.exists(validated_json_directory+'/'+input_json_file) and (json_status == 1 or json_status == 3)):
                     iswitch += 1
-                    print(CRED+validated_json_directory+'/'+input_json_file+' exists...loading'+CEND)
+                    print(CRED+validated_json_directory+'/'+input_json_file+' exists...loading validated file...'+CEND)
                     json_match_df = pd.read_json(r''+validated_json_directory+'/'+input_json_file, orient=json_orient)
 
                     print(json_match_df)
 
                     results0.append(match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match))
+
+            #print('hello')
+            #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
             if(iswitch == 0):
                 results0.append(empty_5xN)
@@ -690,6 +711,8 @@ pd.set_option('display.max_rows', 400)
 pd.set_option('display.max_colwidth', -1)
 
 display(full_table_df)
+
+full_table_df.to_html(json_directory+'/html/'+'full_table_df.html', escape=False)
 
 full_table_df.to_json(json_directory+'/'+'full_table.json')
 
