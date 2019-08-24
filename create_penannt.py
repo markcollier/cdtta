@@ -61,10 +61,17 @@ from src.cdtta_funcs import \
     tidy_json, \
     tuple_pair_to_list, \
     update_player_rank, \
-    update_team_rank
+    update_team_rank, \
+    append_df_to_html, \
+    concat_files, \
+    get_fillins
 
 ################################################################################
 ################################################################################
+
+pd.set_option('display.max_columns', 30)
+pd.set_option('display.max_rows', 400)
+pd.set_option('display.max_colwidth', -1)
 
 # Pennant = "Wednesday Night"
 Pennant = "Thursday Night"
@@ -184,8 +191,6 @@ if( len(Unique_Team_Names) < number_teams ):
 ################################################################################
 ################################################################################
 
-
-
 ################################################################################
 ################################################################################
 
@@ -260,12 +265,16 @@ display(section_team_composition_df)
 
 section_team_composition_df.to_html(json_directory+'/html/'+'section_team_composition_df.html', escape=False)
 
+print(CCYAN+'Generated '+'section_team_composition_df.html'+CEND)
+
 section_team_composition_df.to_json(json_directory+'/'+'section_team_composition.json')
 
 ################################################################################
 ################################################################################
 
 YYYYMMDD = []
+
+#print('number_teams_per_section=',number_teams_per_section)
 
 #number_teams_per_section = [4, 6, 6, 6, 6, 4] #5 an option with 2 rounds of finals.
 
@@ -316,7 +325,10 @@ for round0 in range(99):
     
     if(found_rounds0 == number_rounds):
         print('Finished')
+        break
         #raise SystemExit('Finished.')
+
+#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
 ################################################################################
 ################################################################################
@@ -339,6 +351,8 @@ for cnt,current_number_teams_per_section in enumerate(number_teams_per_section):
         matches_per_round = 3
     else:
         raise SystemExit('Only 4/6 valid:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+#above: doesnt matches_per_round = number_teams_per_section / number_sets?
 
     for number_set in range(number_sets):
         #print('number_set,number_set%number_sets=',number_set,number_set%number_sets)
@@ -464,6 +478,8 @@ if(override_wooden_table):
 wooden_table_allocation_df = pd.DataFrame(wooden_table_allocation_dict)
 
 wooden_table_allocation_df.to_html(json_directory+'/html/'+'wooden_table_allocation_df.html', escape=False)
+
+print(CCYAN+'Generated '+json_directory+'/html/'+'wooden_table_allocation_df.html'+CEND)
     
 #section,ROUND,match = 1,1,1
 
@@ -515,13 +531,24 @@ if(override_draw):
 ################################################################################
 ################################################################################
 
-#draw_all_df = make_draw(diag, all_sections_all_rounds, YYYYMMDD)
+draw_all_df = make_draw(diag, all_sections_all_rounds, YYYYMMDD)
+
+#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
 #exit(0)
 
 #print(len(draw_all_df))
 
-#for draw_one in draw_all_df:
-#    display(draw_one)
+if(os.path.exists(json_directory+'/html/'+'draw_all.html')):
+    os.remove(json_directory+'/html/'+'draw_all.html')
+
+for draw_one_df in draw_all_df:
+    display(draw_one_df)
+    append_df_to_html(diag, draw_one_df, json_directory+'/html/'+'draw_all.html')
+
+print(CCYAN+'Generated '+json_directory+'/html/'+'draw_all.html'+CEND)
+
+#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
         
 ################################################################################
 ################################################################################
@@ -556,6 +583,12 @@ team1_player2s0 = []
 
 team2_player1s0 = []
 team2_player2s0 = []
+
+team1_fillin1s0 = []
+team1_fillin2s0 = []
+
+team2_fillin1s0 = []
+team2_fillin2s0 = []
 
 team1s0 = []
 team2s0 = []
@@ -627,6 +660,22 @@ for round0 in range(number_rounds):
                     json_match_df = pd.read_json(r''+json_directory+'/'+input_json_file, orient=json_orient)
                     results0.append(match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match))
 
+                    #display(json_match_df)
+
+                    #j=json_match_df['Player Names'].values
+                    #k=json_match_df['Fillin Player Names'].values
+
+                    #for cnt,x in enumerate(j):
+                    #    print(j[cnt],k[cnt])
+
+                    team1_fillins1, team1_fillins2, team2_fillins1, team2_fillins2 = \
+                        get_fillins(diag, json_match_df['Player Names'].values.tolist(), json_match_df['Fillin Player Names'].values.tolist())
+                    team1_fillin1s0.append(team1_fillins1)
+                    team1_fillin2s0.append(team1_fillins2)
+                    team2_fillin1s0.append(team2_fillins1)
+                    team2_fillin2s0.append(team2_fillins2)
+#heiden
+
                     #j = match_5xN(diag, json_match_df, number_of_games_per_match, number_of_matches_per_match)
                     #print('j=',j)
                     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
@@ -645,6 +694,10 @@ for round0 in range(number_rounds):
 
             if(iswitch == 0):
                 results0.append(empty_5xN)
+                team1_fillin1s0.append('NO')
+                team1_fillin2s0.append('NO')
+                team2_fillin1s0.append('NO')
+                team2_fillin2s0.append('NO')
 
 ########################################################################################################################################################################################
       
@@ -702,17 +755,19 @@ full_table_df = pd.DataFrame({ \
                         'Team2': team2s0, \
                         'Team2 Player1': team2_player1s0, \
                         'Team2 Player2': team2_player2s0, \
-
+                        'Team1 Fillin1': team1_fillin1s0, \
+                        'Team1 Fillin2': team1_fillin2s0, \
+                        'Team2 Fillin1': team2_fillin1s0, \
+                        'Team2 Fillin2': team2_fillin2s0, \
                         'Result': results0, \
                   })
 
-pd.set_option('display.max_columns', 30)
-pd.set_option('display.max_rows', 400)
-pd.set_option('display.max_colwidth', -1)
 
 display(full_table_df)
 
 full_table_df.to_html(json_directory+'/html/'+'full_table_df.html', escape=False)
+
+print(CCYAN+'Generated '+json_directory+'/html/'+'full_table_df.html'+CEND)
 
 full_table_df.to_json(json_directory+'/'+'full_table.json')
 

@@ -419,7 +419,7 @@ def check_for_empty(diag, scores_whole_match):
 def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, number_of_games_per_match, number_of_matches_per_match, override_result):
     '''
     Creator: Mark Collier
-    Last Modified: 21 August 2019
+    Last Modified: 24 August 2019
     
     Inputs:
     
@@ -438,9 +438,6 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
     import pandas as pd
     from IPython.display import display
     import numpy as np
-    CRED = '\033[91m'
-    CGREEN = '\033[32m'
-    CEND = '\033[0m'
     
     if(number_of_games_per_match == 7):
         maximum_match_points = 41
@@ -613,6 +610,7 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
 
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
     
+    #note that a comma is inserted after game number in TeamA/B to keep it unique in the dataframe:
     if(number_of_games_per_match == 7):
         team_sheet_df = pd.DataFrame({ \
                             'TeamA/B: '+team1 : ['Player1: '+team1_player1, 'Player2: '+team1_player2, 'Player2: '+team1_player2, 'Player1: '+team1_player1, 'Doubles'], \
@@ -1025,11 +1023,13 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     import os.path
     import string
     import inspect
-    
+
     CRED = '\033[91m'
     CGREEN = '\033[32m'
+    CBLUE = '\033[34m'
+    CCYAN = '\033[36m'
     CEND = '\033[0m'
-
+    
     pd.set_option('display.max_columns', 30)
     pd.set_option('display.max_rows', 400)
     pd.set_option('display.max_colwidth', -1)
@@ -1375,7 +1375,7 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
 
       'PlayerA/B X/Y'      : [ [['Team A/B Player A'],['Team X/Y Player A']], [['Team A/B Player B'],['Team X/Y Player B']], [['Team A/B Player B'],['Team X/Y Player A']], [['Team A/B Player A'],['Team X/Y Player B']], [['Doubles A/B'],['Doubles X/Y']], ], \
       'Player Names'       : [ [[team1_player1],[team2_player1]], [[team1_player2],[team2_player2]], [[team1_player2],[team2_player1]], [[team1_player1],[team2_player2]], [['Doubles A/B'],['Doubles X/Y']], ], \
-      'Fillin Playes Names': fillins, \
+      'Fillin Player Names': fillins, \
       'Result'             : results, \
       'Validated'          : ['NO'] * number_of_matches_per_match, \
       'Validated Date/Time': ['NO'] * number_of_matches_per_match, \
@@ -1393,6 +1393,8 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
     print(CRED+'Writing to json file: '+json_directory+'/'+output_data_file+CEND)
 
     raw_match_df.to_html(json_directory+'/html/'+'raw_match.html')
+
+    print(CCYAN+'Generated '+json_directory+'/html/'+'raw_match_df.html'+CEND)
     
     raw_match_df.to_json(r''+json_directory+'/'+output_data_file, orient=json_orient)
 
@@ -1404,6 +1406,7 @@ def live_match(diag, main_df, number_of_games_per_match, number_of_matches_per_m
         fhR = open(json_directory+'/'+'README', 'a')
         fhR.write('################################################################################\n')
         fhR.write(datetime.datetime.today().strftime('YYYY-MM-DD=%Y-%m-%d HH-MM-SS=%H-%M-%S\n'))
+        fhR.write(json_directory+'/'+output_data_file+'\n')
 
         for token in COMMENT.split('$'):
             fhR.write(token.strip()+'\n')
@@ -1454,10 +1457,12 @@ def make_draw(diag, all_sections_all_rounds, YYYYMMDD):
     '''
     import pandas as pd
     from IPython.display import display
+    import inspect
     
     draw_all_df = []
     
-    if(diag): print(YYYYMMDD)
+    if(True): print(YYYYMMDD)
+    if(True): print(len(YYYYMMDD))
 
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))        
 
@@ -1800,7 +1805,7 @@ def pennant_names(diag, what, pennant):
         elif(pennant == 'Wednesday_Night'):
              return(['Taylor, Ben', 'Gin, Darian', 'Ghani, Shahid', 'Waterman, Keith', 'Smith, Jakob', 'D\’Amico, Scott', 'Menzies, Andrew', 'Datta, Raj', 'Nemenyi, Endre', 'Brindley, Aviva', 'Gardner, Mackenzie', 'Rodriguez, JC', 'Paul, Liviston', 'Majumdar, Sourav', 'Jones, Warren', 'Gormann, Ben', 'Roy, Phillip', 'Evans, Richard P', 'Evans, Bruce', 'Kwan, Justin', 'Smith, Greg', 'Cunningham, Bobby', 'Spizzica, Tony', 'Hayden, Ryan', 'Maranan, Jesse', 'Jefimenko, Walter', 'Hewitt, Gerard', 'Qin, Allen', 'Tsao, Justin', 'Hayes, Simon', 'Cauchi, Travis', 'Cheung, Adrian', 'Simons, Shane', 'Hayden, Shane', 'Cung, Robert', 'Neil, Alan', 'Khan, Inaaya', 'Brincat, Tony', 'Stewart, Craig', 'Julian, Rebecca', 'Marsden, Bob', 'Perkins, Shaun', 'Bignell, Quentin', 'Jafarzadeh, Jason', 'Perkins, David', 'Morella, Alex', 'Eddy, Chris', 'McConnell, Nick', 'Mehravar, Hassan', 'Evans, Shaun', 'Chew, Valentine', 'Woodlock, Ron', 'Menz, Garry', 'Petch, David', 'Herweynen, Ed', 'Brown, Andrew', 'Hayden, Chris', 'Jones, Cameron', 'Hassanikhoo, Hamid', 'Conroy, Mark', 'Van Koll, Marinus', 'Wachter, Matt', 'Floyd, Dannie', 'Atalla, Maged', 'Byrne, Jason', 'Evans, Steve', 'Shamakhy, Alireza', 'Cao, Tingting', 'Gray, Kaitlyn', 'Anderson, Caleb', 'Puts, Arnold', 'Balsillie, Terry', 'Thompson, Nick', 'Safir, Amir', 'McGuire, Johnathon', 'Morales, Orangel', 'Martus, Maria', 'Anderson, Daniel', 'Rowland, David', 'Chegini, Fereshteh'])
         elif(pennant == 'Thursday_Night'):
-             return(['Bhiwarkar, Mangesh', 'Keating, John', 'Pilz, Lothar', 'Harris, Lachlan', 'Weighell, Michael', 'Harrison, Leigh', 'Collier, Mark', 'Bellamy, Graham', 'Signor, Dominic', 'Goodridge, Robert', 'Kung, Bernard', 'Signor, Sergio', 'Dyer, Terry', 'Goepfert, Paul', 'Holt, Ben', 'Straughair, Thomas', 'Talolin, Nick', 'Oldham, Cameron', 'Probyn-Smith, Garth', 'Jung, Tad', 'Ryan, Paul', 'Zeng, Jimmy', 'Jefimenko, Paul', 'Morgan, Shane', 'Lee, Johnson', 'Mcerlain, Peter', 'Powell, John', 'Howse, Kalan', 'Mendes, Champ', 'Mazzaferri, Michael', 'Salgueiro, Fernando', "O'Regan, Brendan", 'Zdimirovic, Zoltan', 'Goodwin, Jim', 'Smythe, David', 'Blattman, Ben', 'Byrne, Jason', 'Thompson, David', 'Shamakhy, Alireza', 'Ryan, Chris', 'Ponsonby, Mark', 'Thomson, Jamie', 'Hyde, David', 'Harrison, Schae', 'Emam, Arash', 'Mazzaferri, Henry', 'Darlow, Anthony', 'Harrison, Peter', 'Timmermans,David', 'Van Veen, Peter', 'Rewell, Luke', 'Symes, Brendon', 'Mujica, Jose', 'Short, Craig', 'Ballment, Meg', 'Salgueiro, Christian', 'Wakefield, Paul', 'Falconer, Colin', 'Powell, Robyn', 'Florey, Linda', 'Dodson, Michelle', 'Jordan, Julia', 'Winsemius, Karen', 'Nguyen, Khanh'])
+             return(['Bhiwarkar, Mangesh', 'Keating, John', 'Pilz, Lothar', 'Harris, Lachlan', 'Weighell, Michael', 'Harrison, Leigh', 'Collier, Mark', 'Bellamy, Graham', 'Signor, Dominic', 'Goodridge, Robert', 'Kung, Bernard', 'Signor, Sergio', 'Dyer, Terry', 'Goepfert, Paul', 'Holt, Ben', 'Straughair, Thomas', 'Talolin, Nick', 'Oldham, Cameron', 'Probyn-Smith, Garth', 'Jung, Tad', 'Ryan, Paul', 'Zeng, Jimmy', 'Jefimenko, Paul', 'Morgan, Shane', 'Lee, Johnson', 'McErlain, Peter', 'Powell, John', 'Howse, Kalan', 'Mendes, Champ', 'Mazzaferri, Michael', 'Salgueiro, Fernando', "O'Regan, Brendan", 'Zdimirovic, Zoltan', 'Goodwin, Jim', 'Smythe, David', 'Blattman, Ben', 'Byrne, Jason', 'Thompson, David', 'Shamakhy, Alireza', 'Ryan, Chris', 'Ponsonby, Mark', 'Thomson, Jamie', 'Hyde, David', 'Harrison, Schae', 'Emam, Arash', 'Mazzaferri, Henry', 'Darlow, Anthony', 'Harrison, Peter', 'Timmermans, David', 'Van Veen, Peter', 'Rewell, Luke', 'Symes, Brendon', 'Mujica, Jose', 'Short, Craig', 'Ballment, Meg', 'Salgueiro, Christian', 'Wakefield, Paul', 'Falconer, Colin', 'Powell, Robyn', 'Florey, Linda', 'Dodson, Michelle', 'Jordan, Julia', 'Winsemius, Karen', 'Nguyen, Khanh'])
         else:
             raise SystemExit('pennant_names: "pennant" can be only "Morning_Morning/Thursday_Mornin/Wednesday_Night/Thursday_Night":'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
@@ -1871,5 +1876,59 @@ def append_df_to_html(diag, df, html_file):
         os.remove(html_tmp1)
        
     return(0) # end of append_df_html
+
+################################################################################
+
+def get_fillins(diag, player_names, fillin_names):
+    '''
+    Creator: Mark Collier
+    Last Modified: 24 August 2019
+
+                    team1_fillin1s0.append('NO')
+                    team1_fillin2s0.append('Blow, Joe')
+
+                    team2_fillin1s0.append('NO')
+                    team2_fillin2s0.append('NO')
+
+    Inputs:
+    player_names: these come from a 5 match list dataframe.
+    fillin_names: these come from a 5 match list dataframe.
+
+    Outputs:
+    team1_fillins1, team1_fillins2, team2_fillins1, team2_fillins2: these will be added to the full_table_df so that they can be taken into account when create the team_sheet_df, and the player ranking off that.
+
+    Caveats:
+    currently setup for 2 players teams...
+
+    '''
+    import inspect
+
+    CRED = '\033[91m'
+    CGREEN = '\033[32m'
+    CBLUE = '\033[34m'
+    CCYAN = '\033[36m'
+    CEND = '\033[0m'
+
+    if(diag): print('player_names=',player_names)
+    if(diag): print('fillin_names=',fillin_names)
+
+    team1_fillins1 = fillin_names[0][0][0]
+    team1_fillins2 = fillin_names[1][0][0]
+
+    team2_fillins1 = fillin_names[0][1][0]
+    team2_fillins2 = fillin_names[1][1][0]
+
+    #also check that redundant places, there are 4:
+    if(fillin_names[1][0][0] != fillin_names[2][0][0] or \
+        fillin_names[0][1][0] != fillin_names[2][1][0] or \
+        fillin_names[0][0][0] != fillin_names[3][0][0] or \
+        fillin_names[1][1][0] != fillin_names[3][1][0]):
+        raise SystemExit(CRED+'get_fillins: inconsistent fillin names. '+__file__+' line number: '+str(inspect.stack()[0][2])+CEND)
+
+    #print(team1_fillins1)
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    return(team1_fillins1, team1_fillins2, team2_fillins1, team2_fillins2) # end of get_fillins
 
 ################################################################################

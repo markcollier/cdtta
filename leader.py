@@ -160,11 +160,21 @@ for unique_match_no0 in range(full_table_df_shape[0]):
         raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
         
     if(type(team_sheet_df) != type(None) and type(summary_df) != type(None)):
+    #will only come in here if there is a result to update...:
+
+        team_sheet_df.to_html(json_directory+'/html/'+'team_sheet_df.html')
+        summary_df.to_html(json_directory+'/html/'+'summary_df.html')
+
+        print(CCYAN+'Generated '+json_directory+'/html/'+'team_sheet_df.html'+CEND)
+        print(CCYAN+'Generated '+json_directory+'/html/'+'summary_df.html'+CEND)
+
+        print('unique_match_no0=',unique_match_no0)
         print(CRED+'updating team/player ranking...'+CEND)
         team_rank = update_team_rank(diag, team_sheet_df, summary_df, team_rank, number_of_games_per_match, number_of_matches_per_match)
         player_rank = update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_match, number_of_matches_per_match)
-#         print('team_rank=',team_rank)
-#         print('player_rank=',player_rank)
+        print('team_rank=',team_rank)
+        print('player_rank=',player_rank)
+        raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
         
     #print(team_sheet_df,summary_df)
     
@@ -215,6 +225,9 @@ for section0 in range(number_sections):
 
     #print(section0+1,player_table)
     print_player_table(diag, player_table, section0+1, player_table_html)
+
+print(CCYAN+'Generated '+team_table_html+CEND)
+print(CCYAN+'Generated '+player_table_html+CEND)
 
 #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 

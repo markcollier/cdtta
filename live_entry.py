@@ -62,7 +62,9 @@ from src.cdtta_funcs import \
     tidy_json, \
     tuple_pair_to_list, \
     update_player_rank, \
-    update_team_rank
+    update_team_rank, \
+    append_df_to_html, \
+    concat_files
 
 json_directory = 'cdtta_thursday_night_json' #where json database files are kept.
 
