@@ -1,0 +1,119 @@
+#round 1, section 1, match 1, no fillins
+MARK                  #entry person
+1                     #round
+1                     #section
+1                     #match
+n                     #fillins?
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+n                     #comment
+
+#round 1, section 1, match 2, no fillins
+MARK                  #entry person
+1                     #round
+1                     #section
+2                     #match
+n                     #fillins?
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+n                     #comment
+
+#round 2, section 1, match 1, no fillins
+MARK                  #entry person
+2                     #round
+1                     #section
+1                     #match
+n                     #fillins?
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+n                     #comment
+
+#round 2, section 1, match 2, no fillins
+MARK                  #entry person
+2                     #round
+1                     #section
+2                     #match
+n                     #fillins?
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+n                     #comment
+
+#round 3, section 1, match 1, no fillins
+MARK                  #entry person
+3                     #round
+1                     #section
+1                     #match
+n                     #fillins?
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+n                     #comment
+
+#round 3, section 1, match 2, one fillin
+MARK                  #entry person
+3                     #round
+1                     #section
+2                     #match
+y                     #fillins?
+Blow, Joe             #fillin for Harris, Lachlan
+0                     #no fillin for Weighell, Michael
+0                     #no fillin for Pilz, Lothar
+0                     #no fillin for Harrison, Leigh
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+y                     #comment
+Joe filled in for Lachy.
+
+#round 4, section 1, match 1, one fillin
+MARK                  #entry person
+4                     #round
+1                     #section
+1                     #match
+y                     #fillins?
+0                     #no fillin for Lothar
+0                     #no fillin for Leigh
+0                     #no fillin for Mangesh
+Jobs, Steve           #fillin for Graham
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+y                     #comment
+Steve filled in for Michael.
+
+#round 4, section 1, match 2, one fillin
+MARK                  #entry person
+4                     #round
+1                     #section
+2                     #match
+y                     #fillins?
+0                     #no fillin for John
+Jobs, Steve           #fillin for Mark
+0                     #no fillin for Lachy
+0                     #no fillin for Michael
+0,0,0,0 : 11,11,11,11 #result match 1
+0,0,0,0 : 11,11,11,11 #result match 2
+0,0,0,0 : 11,11,11,11 #result match 3
+0,0,0,0 : 11,11,11,11 #result match 4
+0,0,0,0 : 11,11,11,11 #result match 5
+y                     #comment
+Steve filled in for Mark.
+0

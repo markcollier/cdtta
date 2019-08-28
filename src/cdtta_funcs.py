@@ -433,12 +433,24 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
     
     1. team_sheet_df: a single team sheet match (like used/generated on match night)
     2. summary_df: summary of points (like used/generated on match night)
+
+    Caveats:
+
+    Need to work on detecting fillin players and ensuring that they are awarded the points and added to the section dictionary (and that the player for who they are filling in, miss out on points).
+    The match summary will not be affected as the fillin points go towards this regardless....
+
     '''
     import inspect
     import pandas as pd
     from IPython.display import display
     import numpy as np
-    
+
+    CRED = '\033[91m'
+    CGREEN = '\033[32m'
+    CBLUE = '\033[34m'
+    CCYAN = '\033[36m'
+    CEND = '\033[0m'
+
     if(number_of_games_per_match == 7):
         maximum_match_points = 41
     elif(number_of_games_per_match == 3):
@@ -453,6 +465,7 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
     extract_match = full_table_df.loc[(full_table_df['Round'] == ROUND) & (full_table_df['Section'] == section) & (full_table_df['Match'] == match)]
     
     if(diag): display(extract_match)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     #print('extract_match=',extract_match)
     
@@ -460,17 +473,28 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
     team1_player2 = extract_match['Team1 Player2'].values[0]
     team2_player1 = extract_match['Team2 Player1'].values[0]
     team2_player2 = extract_match['Team2 Player2'].values[0]
-    
+
+    if(diag): print('match_team_summary: team1_player1=',team1_player1)
+    if(diag): print('match_team_summary: team1_player2=',team1_player2)
+    if(diag): print('match_team_summary: team2_player1=',team2_player1)
+    if(diag): print('match_team_summary: team2_player2=',team2_player2)
+
 #     team1_player1 = extract_match[0][7]
 #     team1_player2 = extract_match[0][8]
 #     team2_player1 = extract_match[0][10]
 #     team2_player2 = extract_match[0][11]
 
-    if(diag): print('team1_player1=',team1_player1)
-    if(diag): print('team1_player2=',team1_player2)
+    team1_fillin1 = extract_match['Team1 Fillin1'].values[0]
+    team1_fillin2 = extract_match['Team1 Fillin2'].values[0]
+    team2_fillin1 = extract_match['Team2 Fillin1'].values[0]
+    team2_fillin2 = extract_match['Team2 Fillin2'].values[0]
 
-    if(diag): print('team2_player1=',team2_player1)
-    if(diag): print('team2_player2=',team2_player2)
+    if(diag): print('match_team_summary: team1_fillin1=',team1_fillin1)
+    if(diag): print('match_team_summary: team1_fillin2=',team1_fillin2)
+    if(diag): print('match_team_summary: team2_fillin1=',team2_fillin1)
+    if(diag): print('match_team_summary: team2_fillin2=',team2_fillin2)
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     team1 = extract_match['Team1'].values[0]
     team2 = extract_match['Team2'].values[0]
@@ -478,14 +502,12 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
 #     team1 = extract_match[0][6]
 #     team2 = extract_match[0][9]
 
-    if(diag): print('team1=',team1)
-    if(diag): print('team2=',team2)
+    if(True): print('team1=',team1)
+    if(True): print('team2=',team2)
 
     scores_whole_match = extract_match['Result'].values[0]
     
     #scores_whole_match = extract_match[0][-1]
-
-    #heiden
     
     if(diag): print('match_team_summary: scores_whole_match=',scores_whole_match)
         
@@ -494,8 +516,6 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
         #uncomment later:
         scores_whole_match = override_result
         if(diag): print('match_team_summary: scores_whole_match=',scores_whole_match)
-
-    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     if(check_for_empty(diag, scores_whole_match)):
         if(verbose): print(CGREEN+'match_team_summary: scores are empty.'+CEND)
@@ -614,6 +634,7 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
     if(number_of_games_per_match == 7):
         team_sheet_df = pd.DataFrame({ \
                             'TeamA/B: '+team1 : ['Player1: '+team1_player1, 'Player2: '+team1_player2, 'Player2: '+team1_player2, 'Player1: '+team1_player1, 'Doubles'], \
+                            'FillinA/B: '+team1 : ['Fillin1: '+team1_fillin1, 'Fillin2: '+team1_fillin2, 'Fillin2: '+team1_fillin2, 'Fillin1: '+team1_fillin1, 'Doubles'], \
                             'GAME 1,' : match_AB_T[0], \
                             '2,' : match_AB_T[1], \
                             '3,' : match_AB_T[2], \
@@ -622,6 +643,7 @@ def match_team_summary(diag, full_table_df, section, ROUND, match, verbose, numb
                             '6,' : match_AB_T[5], \
                             '7,' : match_AB_T[6], \
                             'TeamX/Y: '+team2: ['Player1: '+team2_player1, 'Player2: '+team2_player2, 'Player1: '+team2_player2, 'Player2: '+team2_player1, 'Doubles'], \
+                            'FillinX/Y: '+team2: ['Fillin1: '+team2_fillin1, 'Fillin2: '+team2_fillin2, 'Fillin1: '+team2_fillin2, 'Fillin2: '+team2_fillin1, 'Doubles'], \
                             'GAME 1' : match_XY_T[0], \
                             '2' : match_XY_T[1], \
                             '3' : match_XY_T[2], \
@@ -672,6 +694,7 @@ def update_team_rank(diag, team_sheet_df, summary_df, team_rank, number_of_games
     '''
     import pandas as pd
     from IPython.display import display
+    import inspect
     
     header = team_sheet_df.keys()
 
@@ -684,7 +707,7 @@ def update_team_rank(diag, team_sheet_df, summary_df, team_rank, number_of_games
     #need to improve on this, should be able to pull out info. in more general way:
     if(number_of_games_per_match==7):
         teamA =header[0].split(':')[2].strip() #replace(' ', '')
-        teamB =header[8].split(':')[2].strip() #replace(' ', '')
+        teamB =header[9].split(':')[2].strip() #replace(' ', '')
     elif(number_of_games_per_match==3):
         teamA =header[0].split(':')[2].strip() #replace(' ', '')
         teamB =header[4].split(':')[2].strip() #replace(' ', '')
@@ -705,36 +728,71 @@ def update_team_rank(diag, team_sheet_df, summary_df, team_rank, number_of_games
     for cnt,team in enumerate((teamA,teamB,)):
         entry = team_rank[team]
 
-        #print('entry=',entry)
-        entry[0] += 1
+        #print('update_team_rank: entry=',entry)
+
+        #print(entry[0][0])
+        #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+        entry[0][0] += 1
 
         if(cnt==0):
-            entry[1] += teamA_points
-            entry[2] += teamB_points
+            entry[0][1] += teamA_points
+            entry[0][2] += teamB_points
         else:
-            entry[1] += teamB_points
-            entry[2] += teamA_points
+            entry[0][1] += teamB_points
+            entry[0][2] += teamA_points
 
-        #print('entry=',entry)
+        print('entry=',entry)
         team_rank[team] = entry
+        #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     return(team_rank) #end of update_team_rank
 
 ################################################################################
 
-def update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_match, number_of_matches_per_match):
+def update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_match, number_of_matches_per_match, section):
     '''
     Creator: Mark Collier
     Last Modified: 22 August 2019
+
+    In the case of the fillin, the person being filled in would receive no points for/against, these go towards the fillin player.
+    However, in the team_rank the fillin points would still go towards the relevant team and so the fillin aspect is not needed in update_team_rank.
+
+    Inputs:
+
+      section added to be able to unpack fillin names.
     
     update player leader board based on team_sheet_df dataframe.
     '''
     import pandas as pd
+    import inspect
+
+    header = team_sheet_df.keys()
+
+    if(True): print('header=',header)
+
+    if(number_of_games_per_match==7):
+        teamAB_number =int(header[0].split(':')[1].strip().split(' ')[1].strip())
+        teamXY_number =int(header[9].split(':')[1].strip().split(' ')[1].strip())
+        teamAB_name =header[0].split(':')[2].strip()
+        teamXY_name =header[9].split(':')[2].strip()
+    elif(number_of_games_per_match==3):
+        teamAB_number =int(header[0].split(':')[1].strip().split(' ')[1].strip())
+        teamXY_number =int(header[4].split(':')[1].strip().split(' ')[1].strip())
+    else:
+        raise SystemExit('number_of_games_per_match only 3/7 currently:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    if(True): print('teamAB_number=',teamAB_number)
+    if(True): print('teamXY_number=',teamXY_number)
     
     #need to improve on this, should be able to pull out info. in more general way:
     if(number_of_games_per_match==7):
         teamAB_players_tmp = team_sheet_df.iloc[:,0].values
-        teamXY_players_tmp = team_sheet_df.iloc[:,8].values
+        teamXY_players_tmp = team_sheet_df.iloc[:,9].values
+        teamAB_fillins_tmp = team_sheet_df.iloc[:,1].values
+        teamXY_fillins_tmp = team_sheet_df.iloc[:,10].values
+
+        #teamAB_players_tmp = team_sheet_df.loc[team_sheet_df['GAME 1'] == 9]
+
     elif(number_of_games_per_match==3):
         teamAB_players_tmp = team_sheet_df.iloc[:,0].values
         teamXY_players_tmp = team_sheet_df.iloc[:,4].values
@@ -744,7 +802,15 @@ def update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_mat
     #teamAB_players_tmp = team_sheet_df.iloc[:,0].values
     #teamXY_players_tmp = team_sheet_df.iloc[:,8].values
     #teamXY_players_tmp = team_sheet_df.iloc[:,4].values
-    #print('teamAB_players=',teamAB_players)
+
+    print('teamAB_players_tmp=',teamAB_players_tmp)
+    #print('teamXY_players_tmp=',teamXY_players_tmp)
+    #print('teamAB_fillins_tmp=',teamAB_fillins_tmp)
+    #print('teamXY_fillins_tmp=',teamXY_fillins_tmp)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+#fuck
+#        extract_df = section_team_composition_df.loc[section_team_composition_df['Team Name'] == team]
 
     teamAB_players = []
     for player in teamAB_players_tmp[0:-1]:
@@ -754,66 +820,143 @@ def update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_mat
     for player in teamXY_players_tmp[0:-1]:
         teamXY_players.append( player.split(':')[1].strip() )
 
-    if(diag): print('teamAB_players=',teamAB_players)
-    if(diag): print('teamXY_players=',teamXY_players)
+    teamAB_fillins = []
+    for fillin in teamAB_fillins_tmp[0:-1]:
+        teamAB_fillins.append( fillin.split(':')[1].strip() )
+
+    teamXY_fillins = []
+    for fillin in teamXY_fillins_tmp[0:-1]:
+        teamXY_fillins.append( fillin.split(':')[1].strip() )
+
+    if(True): print('teamAB_players=',teamAB_players)
+    if(True): print('teamXY_players=',teamXY_players)
+    if(True): print('teamAB_fillins=',teamAB_fillins)
+    if(True): print('teamXY_fillins=',teamXY_fillins)
 
     #need to improve on this, should be able to pull out info. in more general way:
     if(number_of_games_per_match==7):
-        teamAB_results = team_sheet_df.iloc[:,16][0:-1].values
-        teamXY_results = team_sheet_df.iloc[:,17][0:-1].values
+        teamAB_results = team_sheet_df.iloc[:,18][0:-1].values
+        teamXY_results = team_sheet_df.iloc[:,19][0:-1].values
     elif(number_of_games_per_match==3):
         teamAB_results = team_sheet_df.iloc[:,9][0:-1].values
         teamXY_results = team_sheet_df.iloc[:,10][0:-1].values
     else:
         raise SystemExit('number_of_games_per_match only 3/7 currently:'+__file__+' line number: '+str(inspect.stack()[0][2]))
         
-    if(diag): print('teamAB_results=',teamAB_results)
-    if(diag): print('teamXY_results=',teamXY_results)
+    if(True): print('teamAB_results=',teamAB_results)
+    if(True): print('teamXY_results=',teamXY_results)
 
-    if(diag): print('player_rank=',player_rank)
+    if(True): print('player_rank=',player_rank)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    #player_or_fillin: decide who the points go to/against. 
 
     for cnt,player in enumerate(teamAB_players):
-        if(diag): print('player=',player)
-        entry = player_rank[player]
-        entry[0] = entry[0] + teamAB_results[cnt]
-        entry[1] = entry[1] + teamXY_results[cnt]
-        entry[2] = entry[2] + teamAB_results[cnt] + teamXY_results[cnt]
+        if(teamAB_fillins[cnt].strip() == 'NO'):
+            fillin == 'NO'
+            player_or_fillin = player
+        else:
+            fillin = teamAB_fillins[cnt].strip().replace(' ','$').replace(',','#')+'_'+teamAB_name+'_'+str(section)+'_'+str(teamAB_number)
+            player_or_fillin = fillin
+
+#B#$M_Bandicoot_1_1
+
+        if(True): print('player,fillin=',player,fillin)
+
+#        j = player_rank[fillin]
+#        print('j=',j)
+#        print('j[4]=',j[4])
+
+        print('player_rank=',player_rank)
+        print('player_or_fillin=',player_or_fillin)
+        entry = player_rank[player_or_fillin]
+
+        entry[0][0] = entry[0][0] + teamAB_results[cnt]
+        entry[0][1] = entry[0][1] + teamXY_results[cnt]
+        entry[0][2] = entry[0][2] + teamAB_results[cnt] + teamXY_results[cnt]
         if(diag): print('entry=',entry)
-        player_rank[player] = entry
+        player_rank[player_or_fillin] = entry
 
     for cnt,player in enumerate(teamXY_players):
-        entry = player_rank[player]
-        entry[0] = entry[0] + teamXY_results[cnt]
-        entry[1] = entry[1] + teamAB_results[cnt]
-        entry[2] = entry[2] + teamXY_results[cnt] + teamAB_results[cnt]
-        #print('entry=',entry)
-        player_rank[player] = entry
+        if(teamXY_fillins[cnt].strip() == 'NO'):
+            fillin == 'NO'
+            player_or_fillin = player
+        else:
+            fillin = teamXY_fillins[cnt].strip().replace(' ','$').replace(',','#')+'_'+teamXY_name+'_'+str(section)+'_'+str(teamXY_number)
+            player_or_fillin = fillin
 
+        entry = player_rank[player_or_fillin]
+        entry[0][0] = entry[0][0] + teamXY_results[cnt]
+        entry[0][1] = entry[0][1] + teamAB_results[cnt]
+        entry[0][2] = entry[0][2] + teamXY_results[cnt] + teamAB_results[cnt]
+        #print('entry=',entry)
+        player_rank[player_or_fillin] = entry
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
     return(player_rank) #end of update_player_rank
 
 ################################################################################
 
-def reset_team_player_rank(diag, section_team_composition_df):
+def reset_team_player_rank(diag, section_team_composition_df, fillin_list):
     '''
     Creator: Mark Collier
-    Last Modified: 16 August 2019
+    Last Modified: 26 August 2019
     
     reset team and player leader board based on section_team_composition_df dataframe.
+
+    Inputs:
+
+      section_team_composition_df: regular team and player combinations across all sections (does not include fillin players).
+      fillin_list: fill in list (or None if no fillins).
+
+    Outputs:
+
+      format of dictionaries:
+      for all 'Team Name'
+      team_rank['Team Name'] = [won=0, lost=0, total=0], Section (integer 1-max(#section)), Team (integer 1-max(#team))
+
+      for all 'Player Name'
+      player_rank['Player Name'] = [won=0, lost=0, total=0], Section (integer 1-max(#section)), Team (integer 1-max(#team)), Team Name (string), FillIN ('NO')
+
+    total should always equal won+lost for both team_rank & player_rank
     '''
     import pandas as pd
+    import inspect
+
+    fillin = 'NO' #default
+
+    print('fillin_list=',fillin_list)
+#heiden
 
     team_rank = {}
     for team in section_team_composition_df['Team Name'].values:
-        team_rank[team] = [0,0,0]
+        extract_df = section_team_composition_df.loc[section_team_composition_df['Team Name'] == team]
+        section_number = extract_df['Section'].values[0]
+        team_number = extract_df['Team'].values[0]
+        team_rank[team] = [0,0,0], section_number, team_number
+
+        #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     player_rank = {}
     for player in section_team_composition_df['Player 1'].values:
-        #print('aaa'+player+'bbb')
-        player_rank[player] = [0,0,0]
+        extract_df = section_team_composition_df.loc[section_team_composition_df['Player 1'] == player]
+        section_number = extract_df['Section'].values[0]
+        team_number = extract_df['Team'].values[0]
+        team_name = extract_df['Team Name'].values[0]
+        player_rank[player] = [0,0,0], section_number, team_number, team_name, fillin
+
     for player in section_team_composition_df['Player 2'].values:
-        #print('aaa'+player+'bbb')
-        player_rank[player] = [0,0,0]
-        
+        extract_df = section_team_composition_df.loc[section_team_composition_df['Player 2'] == player]
+        section_number = extract_df['Section'].values[0]
+        team_number = extract_df['Team'].values[0]
+        team_name = extract_df['Team Name'].values[0]
+        player_rank[player] = [0,0,0], section_number, team_number, team_name, fillin
+
+    if(type(fillin_list) != type(None)):
+        for fillin in fillin_list:
+            player,team_name,section_number,team_number = unpack_fillin_string(diag, fillin)
+            player_rank[fillin] = [0,0,0], section_number, team_number, team_name, 'YES'
+
     return(team_rank, player_rank) #end of reset_team_player_rank
 
 ################################################################################
@@ -821,21 +964,27 @@ def reset_team_player_rank(diag, section_team_composition_df):
 def print_player_table(diag, player_table, section, html_file):
     '''
     Creator: Mark Collier
-    Last Modified: 23 August 2019
+    Last Modified: 26 August 2019
     
     print player leader board dataframe.
     '''
     from IPython.display import display
     import pandas as pd
+    import inspect
 
-    won,lost,total = [],[],[]
+    #print('player_table=',player_table)
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+    won,lost,total,fillin = [],[],[],[]
     for player in list(player_table.keys()):
-        #print(player_table[player])
-        won.append(player_table[player][0])
-        lost.append(player_table[player][1])
-        total.append(player_table[player][2])
+        #print(player,player_table[player])
+        won.append(player_table[player][0][0])
+        lost.append(player_table[player][0][1])
+        total.append(player_table[player][0][2])
+        fillin.append(player_table[player][4])
     player_table_df = pd.DataFrame({ \
                                     'Player': list(player_table.keys()), \
+                                    'Fillin': fillin, \
                                     'Section': [section] * len(list(player_table.keys())), \
                                     'Won': won, \
                                     'Lost': lost, \
@@ -855,19 +1004,21 @@ def print_player_table(diag, player_table, section, html_file):
 def print_team_table(diag, team_table, section, html_file):
     '''
     Creator: Mark Collier
-    Last Modified: 23 August 2019
+    Last Modified: 26 August 2019
     
     print team leader board dataframe.
     '''
     from IPython.display import display
     import pandas as pd
+    import inspect
     
     rounds,won,lost = [],[],[]
     for team in list(team_table.keys()):
-        #print(team_table[team])
-        rounds.append(team_table[team][0])
-        won.append(team_table[team][1])
-        lost.append(team_table[team][2])
+        print(team_table[team])
+        #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+        rounds.append(team_table[team][0][0])
+        won.append(team_table[team][0][1])
+        lost.append(team_table[team][0][2])
     team_table_df = pd.DataFrame({ \
                                     'Team': list(team_table.keys()), \
                                     'Section': [section] * len(list(team_table.keys())), \
@@ -1884,12 +2035,6 @@ def get_fillins(diag, player_names, fillin_names):
     Creator: Mark Collier
     Last Modified: 24 August 2019
 
-                    team1_fillin1s0.append('NO')
-                    team1_fillin2s0.append('Blow, Joe')
-
-                    team2_fillin1s0.append('NO')
-                    team2_fillin2s0.append('NO')
-
     Inputs:
     player_names: these come from a 5 match list dataframe.
     fillin_names: these come from a 5 match list dataframe.
@@ -1930,5 +2075,112 @@ def get_fillins(diag, player_names, fillin_names):
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     return(team1_fillins1, team1_fillins2, team2_fillins1, team2_fillins2) # end of get_fillins
+
+def find_fillins(diag, full_table_df):
+    '''
+    Creator: Mark Collier
+    Last Modified: 27 August 2019
+
+    Search full_table_df for any fill ins, and record them in a specially formatted/coded list.
+
+    Care needs to be taken when creating the fillin names so that they are consistent throughout the season
+      (else manually edit them so that they are).
+
+    As the list contains unique names (encoded fillin name, with section, team_name and section number in them) there is only one that spans all sections.
+
+    Inputs:
+      full_table_df: main dataframe.
+    Outputs:
+      list. If there are none then return None.
+
+    Outputs:
+      As the same fill in can be used in different teams within the same section, or in another section, a
+      special convention used:
+      - Any spaces in the player name are replaced with a $ (so that they can be replaced by a space
+      when formatted later)
+      - Any commas in the player name are replaced with a # (so that they can be replaced by a comma
+      when formatted later)
+      - A team, section, team number strings
+      - e.g. [Collier#$Mark_Bandicoot_1_1, ...]
+    '''
+
+    import inspect
+    import pandas as pd
+    from IPython.display import display
+    pd.set_option('display.max_columns', 30)
+    pd.set_option('display.max_rows', 400)
+    pd.set_option('display.max_colwidth', -1)
+
+    full_table_df_shape = full_table_df.shape
+    print(full_table_df_shape)
+
+    fillins = []
+    for unique_match_no0 in range(full_table_df_shape[0]):
+        print('unique_match_no0=',unique_match_no0)
+
+        t1f1 = full_table_df.loc[unique_match_no0]['Team1 Fillin1']
+        t1f2 = full_table_df.loc[unique_match_no0]['Team1 Fillin2']
+        t2f1 = full_table_df.loc[unique_match_no0]['Team2 Fillin1']
+        t2f2 = full_table_df.loc[unique_match_no0]['Team2 Fillin2']
+        team1 = full_table_df.loc[unique_match_no0]['Team1']
+        team2 = full_table_df.loc[unique_match_no0]['Team2']
+        section = full_table_df.loc[unique_match_no0]['Section']
+
+        #print(j)
+        #print(k)
+        #print(l)
+        #print(m)
+
+        print(team1)
+        print(team2)
+        #print(section)
+
+
+        #print(team1_number,team2_number)
+
+        print(team1.split(' ')[2].strip())
+        if(team1.split(' ')[2].strip() != 'Dummy'):
+            team1_number = int(team1.split(':')[0].split(' ')[1])
+            if(t1f1.strip() != 'NO'):
+                fillins.append( t1f1.strip().replace(' ','$').replace(',','#')+'_'+team1.split(':')[1].strip()+'_'+str(section)+'_'+str(team1_number) )
+            if(t1f2.strip() != 'NO'):
+                fillins.append( t1f2.strip().replace(' ','$').replace(',','#')+'_'+team1.split(':')[1].strip()+'_'+str(section)+'_'+str(team1_number) )
+
+        print(team2.split(' ')[2].strip())
+        if(team2.split(' ')[2].strip() != 'Dummy'):
+            team2_number = int(team2.split(':')[0].split(' ')[1])
+            if(t2f1.strip() != 'NO'):
+                fillins.append( t2f1.strip().replace(' ','$').replace(',','#')+'_'+team2.split(':')[1].strip()+'_'+str(section)+'_'+str(team2_number) )
+            if(t2f2.strip() != 'NO'):
+                fillins.append( t2f2.strip().replace(' ','$').replace(',','#')+'_'+team2.split(':')[1].strip()+'_'+str(section)+'_'+str(team2_number) )
+
+    print('fillins=',fillins)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    if(len(fillins) == 0):
+        return(None)
+    else:
+        return(fillins)
+
+def unpack_fillin_string(diag, string):
+    '''
+    '''
+
+    import inspect
+
+    #print('string=',string)
+
+    tokens = string.split('_')
+    #print('tokens=',tokens)
+
+    team = tokens[1]
+    section = int(tokens[2])
+    team_number = int(tokens[3])
+    player = tokens[0].replace('$',' ').replace('#',',')
+
+    #print(player,team,section,team_number)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    return(player,team,section,team_number)
 
 ################################################################################

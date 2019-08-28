@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#need to run create_pennant.py to ensure results sections are up-to-date.
+
 diag = True
 diag = False
 
@@ -62,7 +64,9 @@ from src.cdtta_funcs import \
     update_player_rank, \
     update_team_rank, \
     append_df_to_html, \
-    concat_files
+    concat_files, \
+    find_fillins, \
+    unpack_fillin_string
 
 ################################################################################
 ################################################################################
@@ -134,7 +138,28 @@ section_team_composition_df = pd.read_json(json_directory+'/'+'section_team_comp
 
 full_table_df = pd.read_json(json_directory+'/'+'full_table.json')
 
-team_rank,player_rank = reset_team_player_rank(diag, section_team_composition_df)
+#perhaps go through the full_table_df looking for fillins, then add these to the section_team_composition_df.
+#it is possible that a fillin can appear in more than one section.
+#a fillin could fillin for multiple teams in the same section, however, they would get points as if they were in the one team.
+
+#think best to keep a list of:
+#player team win low total
+#so that for the case of fillins a player who fills in for multiple teams is captured. They can be added together in the final table if necessary.
+
+# pass fill in info. to reset_team_player so that it gets added in.
+
+fillins_list = find_fillins(diag, full_table_df)
+
+#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+team_rank,player_rank = reset_team_player_rank(diag, section_team_composition_df, fillins_list)
+
+print(player_rank)
+
+#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+#print('j=',j)
+#raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
 #print('team_rank=',team_rank)
 
@@ -170,16 +195,19 @@ for unique_match_no0 in range(full_table_df_shape[0]):
 
         print('unique_match_no0=',unique_match_no0)
         print(CRED+'updating team/player ranking...'+CEND)
+
+        player_rank = update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_match, number_of_matches_per_match, section)
+
         team_rank = update_team_rank(diag, team_sheet_df, summary_df, team_rank, number_of_games_per_match, number_of_matches_per_match)
-        player_rank = update_player_rank(diag, team_sheet_df, player_rank, number_of_games_per_match, number_of_matches_per_match)
-        print('team_rank=',team_rank)
-        print('player_rank=',player_rank)
-        raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+        #print('player_rank=',player_rank)
+        #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+        #print('team_rank=',team_rank)
         
     #print(team_sheet_df,summary_df)
     
 if(diag): print('team_rank=',team_rank)
-if(diag): print('player_rank=',player_rank)
+if(True): print('player_rank=',player_rank)
 
 #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
@@ -209,21 +237,50 @@ for section0 in range(number_sections):
     
     #print(section0+1,team_table)
     print_team_table(diag, team_table, section0+1, team_table_html)
-    
+
+#print('xxx=',player_rank['B#$M_Bandicoot_1_1'])
+
 for section0 in range(number_sections):
+
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
     player_table = {}
     section_stuff = section_team_composition_df.loc[section_team_composition_df['Section'] == section0+1].values
     
-    #print('section_stuff=',section_stuff)
+    print('section_stuff=',section_stuff)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    #add in fillins to the player ranking for the particular section...
+    #later these will be processed/formatted so that fillins are put to the bottom of the list, and
+    #separate values for every team/section they play for.
+
+    print('fillins_list=',fillins_list)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    if(type(fillins_list) != type(None)):
+        for fillin in fillins_list:
+            player,team_name,section_number,team_number = unpack_fillin_string(diag, fillin)
+            if(section_number==section0+1):
+                #print('player,team_name,section_number,team_number=',player,team_name,section_number,team_number)
+                #j = player_rank[fillin]
+                #print(j)
+                #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+                #print('fillin=',fillin)
+                #player_table[player] = player_rank[fillin] #use unpacked player name, player.
+                player_table[fillin] = player_rank[fillin] #use unpacked player name, player.
+
+        #add in regular players for the particular section...
 
     for cnt in range(len(section_stuff)):
         player_names = section_stuff[cnt][3:4+1]
         #print('player_names=',player_names)
-
+        #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
         for player_name in player_names:
             player_table[player_name] = player_rank[player_name]
 
-    #print(section0+1,player_table)
+    #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
+
+    print(section0+1,player_table)
     print_player_table(diag, player_table, section0+1, player_table_html)
 
 print(CCYAN+'Generated '+team_table_html+CEND)
