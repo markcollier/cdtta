@@ -964,7 +964,7 @@ def reset_team_player_rank(diag, section_team_composition_df, fillin_list):
 def print_player_table(diag, player_table, section, html_file):
     '''
     Creator: Mark Collier
-    Last Modified: 26 August 2019
+    Last Modified: 29 August 2019
     
     print player leader board dataframe.
     '''
@@ -973,19 +973,29 @@ def print_player_table(diag, player_table, section, html_file):
     import inspect
 
     #print('player_table=',player_table)
-
     #raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
-    won,lost,total,fillin = [],[],[],[]
+
+    won,lost,total,fillin,team_name,player_or_fillin = [],[],[],[],[],[]
     for player in list(player_table.keys()):
         #print(player,player_table[player])
         won.append(player_table[player][0][0])
         lost.append(player_table[player][0][1])
         total.append(player_table[player][0][2])
         fillin.append(player_table[player][4])
+        team_name.append(player_table[player][3])
+
+        if(player_table[player][4].strip() == 'YES'):
+            playerX,team_nameX,section_numberX,team_numberX = unpack_fillin_string(diag, player)
+            player_or_fillin.append( playerX )
+        else:
+            player_or_fillin.append( player )
+
     player_table_df = pd.DataFrame({ \
-                                    'Player': list(player_table.keys()), \
+#                                    'Player': list(player_table.keys()), \
+                                    'Player': player_or_fillin, \
                                     'Fillin': fillin, \
                                     'Section': [section] * len(list(player_table.keys())), \
+                                    'Team Name': team_name, \
                                     'Won': won, \
                                     'Lost': lost, \
                                     'Total': total, \
@@ -993,9 +1003,10 @@ def print_player_table(diag, player_table, section, html_file):
 
     display(player_table_df.sort_values(by='Won', ascending=False))
 
-    a = append_df_to_html(diag, player_table_df, html_file)
+    #sort so that Fillins are at the bottom of the table regardless of their points (but they are also ranked).
+    a = append_df_to_html(diag, player_table_df.sort_values(by=['Won','Fillin'], ascending=[False,True]), html_file)
 
-    #player_table_df.to_html('player_table_df.html', escape=False)
+    raise SystemExit('STOP!:'+__file__+' line number: '+str(inspect.stack()[0][2]))
 
     return() # end of print_player_table
 

@@ -97,7 +97,7 @@ Jobs, Steve           #fillin for Graham
 0,0,0,0 : 11,11,11,11 #result match 4
 0,0,0,0 : 11,11,11,11 #result match 5
 y                     #comment
-Steve filled in for Michael.
+Steve filled in for Graham.
 
 #round 4, section 1, match 2, one fillin
 MARK                  #entry person
